@@ -10,7 +10,7 @@ reset - resets simulator
 help - helps you
 
 Script functions:
-loadOS - assembles and loads os into mem
+os - assembles and loads os into mem (clears output console too)
 run - assembles and load current project
 
 Basic Colors (RGB):
