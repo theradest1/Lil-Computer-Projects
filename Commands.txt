@@ -1,10 +1,15 @@
 guide: https://acg.cis.upenn.edu/milom/cse240-Fall05/handouts/lc3guide.html
 
+Console commands:
 as [file].asm - assemble
 load [file].obj - loads
 list [mem] - goes to specified line
 break set [mem] - breaks program at specified line
-script [file].lcs - runs script that just uses the console thing
+script [file] - runs script that just uses the console thing
+
+Script functions:
+loadOS - assembles and loads os into mem
+run - assembles and load current project
 
 starting registers:
 PC = x0200
