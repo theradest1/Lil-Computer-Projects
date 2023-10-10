@@ -3,16 +3,20 @@ guide: https://acg.cis.upenn.edu/milom/cse240-Fall05/handouts/lc3guide.html
 Console commands:
 as [file].asm - assemble
 load [file].obj - loads
-list [mem] - goes to specified line
+list [mem] - goes to specified line and reads out contained data
 break set [mem] - breaks program at specified line
 script [file] - runs script that just uses the console thing
+reset - resets simulator
+help - helps you
 
 Script functions:
 loadOS - assembles and loads os into mem
 run - assembles and load current project
 
-starting registers:
-PC = x0200
-MPR = x0000
-PSR = x8002
-CC = Z
+Basic Colors (RGB):
+x7FFF	White
+x0000	Black
+x7C00	Red
+x03E0	Green
+x001F	Blue
+x3466	Puce
