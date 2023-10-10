@@ -2,6 +2,6 @@
 // Scope level 0:
 //	Symbol Name       Page Address
 //	----------------  ------------
-//	LOOP              3001
-//	START             3000
+//	CORLOOP           3004
+//	START             3001
 

@@ -1,3 +1,4 @@
+reset
 clear
 as os/lc3os.asm
 load os/lc3os.obj

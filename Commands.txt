@@ -11,7 +11,8 @@ help - helps you
 
 Script functions:
 os - assembles and loads os into mem (clears output console too)
-run - assembles and load current project
+program - assembles and load current project
+run (in root dir) - resets os and project then runs it
 
 Basic Colors (RGB):
 x7FFF	White
