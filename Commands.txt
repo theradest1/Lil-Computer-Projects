@@ -1,0 +1,13 @@
+guide: https://acg.cis.upenn.edu/milom/cse240-Fall05/handouts/lc3guide.html
+
+as [file].asm - assemble
+load [file].obj - loads
+list [mem] - goes to specified line
+break set [mem] - breaks program at specified line
+script [file].lcs - runs script that just uses the console thing
+
+starting registers:
+PC = x0200
+MPR = x0000
+PSR = x8002
+CC = Z
