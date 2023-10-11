@@ -1,15 +1,22 @@
-        .orig x2FFF				; 1 value earlier than usual for start mem
-		.FILL x0001				; put the inverted end value at this mem location
-		.FILL xC000				; start of screen mem
-START   LD R2,#-2				; load the start of screen into R2
-		LD R3,#-4				; load the inv-end of the screen into R3
-		ADD R4,R4,#5
-CORLOOP	ADD R2,R2,#1            ; R2 <= R2 + 1
-		ADD R4,R2,#1
-		STR R4,R2,#0            ; set address in R2 to R4 (corrupt the mem yay!)
-		ADD R3,R2,R3			; add current mem and inv-screen end to see if 
-		BRz START				; go to start if end of screen
-        JSR CORLOOP				; jump to loop
-		HALT                    ; return to os
-	.end
+        .orig x2FFD				; 1 value earlier than usual for start mem
+		.FILL xC000				; start of screen mem (+1 for example)
+		.FILL xFDFE				; End of screen mem (-1 for example)
+		.FILL x0F00				; start color
+START   LD R3,#-3				; load the end of the screen into R3
+		LD R4,#-3				; load start color
+
+		NOT R3,R3				; change R3 to negative (pre-computing)
+		ADD R3,R3,#1
+
+INCOLOR ADD R4,R4,#1			; increment color
+		LD R2,#-9				; load the start of screen into R2
+
+LOOP	ADD R2,R2,#2            ; R2 <= R2 + 1		R2 is address coutnter
+		ADD R4,R4,#1			; R4 <= R2 + 1		R4 is color
+		STR R4,R2,#0            ; mem[R2 + 0] <= R4
+		ADD R1,R2,R3			; R1 <= R2 - R3 R3
+		BRnp LOOP				; go to LOOP if previous calc is not zero
+		JSR INCOLOR
+		HALT
+		.end
         

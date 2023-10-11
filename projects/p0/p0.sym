@@ -2,6 +2,7 @@
 // Scope level 0:
 //	Symbol Name       Page Address
 //	----------------  ------------
-//	CORLOOP           3004
-//	START             3001
+//	INCOLOR           3004
+//	LOOP              3006
+//	START             3000
 
