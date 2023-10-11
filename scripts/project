@@ -1,2 +1,2 @@
-as projects/p0/p0.asm
-load projects/p0/p0.obj
+as projects/p1/p1.asm
+load projects/p1/p1.obj

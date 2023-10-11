@@ -1,0 +1,14 @@
+// Symbol table
+// Scope level 0:
+//	Symbol Name       Page Address
+//	----------------  ------------
+//	COLOR_START       300F
+//	SCREEN_START      300D
+//	LOOP              3005
+//	SCREEN_END        300E
+//	INCOLOR           3004
+//	RAND              3012
+//	RAND_SEED2        3011
+//	START             3000
+//	RAND_SEED1        3010
+

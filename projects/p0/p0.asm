@@ -1,4 +1,4 @@
-        .orig x2FFD				; 1 value earlier than usual for start mem
+        .orig x2FFD
 		.FILL xC000				; start of screen mem (+1 for example)
 		.FILL xFDFE				; End of screen mem (-1 for example)
 		.FILL x0F00				; start color
@@ -15,10 +15,9 @@ LOOP	ADD R2,R2,#1            ; R2 <= R2 + 1
 		ADD R4,R4,#1			; R4 <= R2 + 1
 		STR R4,R2,#0            ; mem[R2 + 0] <= R4
 
-		ADD R1,R2,R3			; R1 <= R2 - R3 R3
+		ADD R1,R2,R3			; R1 <= R2 - R3
 		BRnp LOOP				; go to LOOP if previous calc is not zero
 
-		JSR INCOLOR				; if not end of screen mem, increment color and reset mem counter (R2)
+		JSR INCOLOR				; if not end of screen mem, increment color and reset mem counter
 		HALT					; return to os (never)
 		.end
-        
