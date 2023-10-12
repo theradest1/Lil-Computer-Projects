@@ -15,7 +15,7 @@ LOOP0	AND R5,R5,#0			; reset y
 LOOP1	ADD R5,R5,#1			; step y
 
 		LD R0,SCREEN_SIZE_I		;
-		ADD	R0,R5,R0			; reset y if y > screen_size
+		ADD	R0,R5,R0			; reset y if y = screen_size
 		ADD R0,R0,#-1			;
 		BRz LOOP0				;
 
@@ -24,7 +24,7 @@ LOOP1	ADD R5,R5,#1			; step y
 LOOP2	ADD R6,R6,#1			; step x
 
 		LD R0,SCREEN_SIZE_I		;
-		ADD	R0,R6,R0			; reset 6 & increment y if x > screen_size
+		ADD	R0,R6,R0			; reset 6 & increment y if x = screen_size
 		ADD R0,R0,#-1			;
 		BRz LOOP1				;
 
