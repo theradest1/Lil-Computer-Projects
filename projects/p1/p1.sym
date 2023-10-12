@@ -2,17 +2,19 @@
 // Scope level 0:
 //	Symbol Name       Page Address
 //	----------------  ------------
-//	EXIT              3006
-//	MULT3             3021
-//	MULT2             301D
-//	SCREEN_START      300C
-//	MULT1             3018
-//	MULT              3015
-//	LOOP              3005
-//	SCREEN_END        300D
-//	INCOLOR           3004
-//	RAND              3010
+//	EXIT              300A
+//	MULT3             302D
+//	MULT2             3029
+//	SCREEN_START      3010
+//	MULT1             3024
+//	MULT              3021
+//	LOOP              3009
+//	SCREEN_END        3011
+//	RAND_LIM          3015
+//	RAND_INCR         3014
+//	INCOLOR           3008
+//	RAND              3016
 //	START             3000
-//	RAND_MULT         300F
-//	RAND_SEED         300E
+//	RAND_MULT         3013
+//	RAND_SEED         3012
 
