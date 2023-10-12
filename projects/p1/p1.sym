@@ -3,18 +3,21 @@
 //	Symbol Name       Page Address
 //	----------------  ------------
 //	EXIT              300A
-//	MULT3             302D
-//	MULT2             3029
-//	SCREEN_START      3010
-//	MULT1             3024
-//	MULT              3021
-//	LOOP              3009
-//	SCREEN_END        3011
 //	RAND_LIM          3015
-//	RAND_INCR         3014
-//	INCOLOR           3008
-//	RAND              3016
-//	START             3000
-//	RAND_MULT         3013
+//	LOOP              3009
 //	RAND_SEED         3012
+//	RAND_MULT         3013
+//	RAND              3016
+//	RAND3             3024
+//	SCREEN_END        3011
+//	RAND2             3020
+//	RAND1             301B
+//	MULT              302C
+//	SCREEN_START      3010
+//	MULT3             3038
+//	RAND_INCR         3014
+//	MULT2             3034
+//	MULT1             302F
+//	START             3000
+//	INCOLOR           3008
 
