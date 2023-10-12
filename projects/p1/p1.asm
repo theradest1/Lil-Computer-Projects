@@ -1,9 +1,5 @@
         .orig x3000
-START	LD R3,SCREEN_END		; making things negative for checks
-		NOT R3,R3				; (pre-computing is faster)
-		ADD R3,R3,#1			;
-		ST R3,SCREEN_END		;
-								;
+START
 		LD R3,RAND_LIM			;
 		NOT R3,R3				;
 		ADD R3,R3,#1			;
@@ -14,32 +10,34 @@ START	LD R3,SCREEN_END		; making things negative for checks
 		ADD R3,R3,#1			;
 		ST R3,SCREEN_SIZE_I		;
 
-LOOP0	AND R5,R5,#0			; reset x
-LOOP1	ADD R5,R5,#1			; step x
+LOOP0	AND R5,R5,#0			; reset y
+		ADD R5,R5,#-1
+LOOP1	ADD R5,R5,#1			; step y
 
 		LD R0,SCREEN_SIZE_I		;
-		ADD	R0,R5,R0			; reset x if x > screen_size
+		ADD	R0,R5,R0			; reset y if y > screen_size
+		ADD R0,R0,#-1			;
 		BRz LOOP0				;
 
-		AND R6,R6,#0			; reset y
-LOOP2	ADD R6,R6,#1			; step y
+		AND R6,R6,#0			; reset x
+		ADD R6,R6,#-1			;
+LOOP2	ADD R6,R6,#1			; step x
 
 		LD R0,SCREEN_SIZE_I		;
-		ADD	R0,R6,R0			; reset 6 & increment x if y > screen_size
+		ADD	R0,R6,R0			; reset 6 & increment y if x > screen_size
+		ADD R0,R0,#-1			;
 		BRz LOOP1				;
 
 		ST R5,R5STORE			;
-		ST R6,R6STORE			;
 		JSR RAND				; get random color
 		LD R5,R5STORE			;
-		LD R6,R6STORE			;
 
 		AND R2,R0,#-1			;
-		AND R0,R5,#-1			;
-		AND R1,R6,#-1			; put point at (R5,R6) with color R2
-		ST R5,R5STORE
+		AND R1,R5,#-1			;
+		AND R0,R6,#-1			; put point at (R5,R6) with color R2
+		ST R5,R5STORE			;
 		JSR POINT				;
-		LD R5,R5STORE
+		LD R5,R5STORE			;
 
 		JSR LOOP2				;go back to start of y loop
 
@@ -51,10 +49,9 @@ LOOP2	ADD R6,R6,#1			; step y
 
 
 
-SCREEN_START .FILL xC000		
-SCREEN_END .FILL xFDFE
-SCREEN_SIZE .FILL x007E
-SCREEN_SIZE_I .FILL x007E		; (gets inverted)
+SCREEN_START .FILL xC000
+SCREEN_SIZE .FILL x0080
+SCREEN_SIZE_I .FILL x0080		; (gets inverted)
 
 RAND_SEED .FILL x0001			; stuff for random nums
 RAND_MULT .FILL x0002			;
@@ -149,9 +146,9 @@ MULT	;multiplication - input R1, R2, output R0
 		ADD R4,R0,#-1	; end condition mask	
 
 MULT1	AND R2,R2,R4	; any bits left
-		BRz MULT3			;
+		BRz MULT3		;
 		AND R5,R2,R3	; test bit
-		BRz MULT2			;
+		BRz MULT2		;
 		ADD R0,R0,R1	; add mult to result
 
 MULT2	ADD R1,R1,R1	; shift mult bits
