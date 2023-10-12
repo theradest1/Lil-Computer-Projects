@@ -29,13 +29,17 @@ LOOP2	ADD R6,R6,#1			; step y
 		BRz LOOP1				;
 
 		ST R5,R5STORE			;
+		ST R6,R6STORE			;
 		JSR RAND				; get random color
 		LD R5,R5STORE			;
+		LD R6,R6STORE			;
 
 		AND R2,R0,#-1			;
 		AND R0,R5,#-1			;
 		AND R1,R6,#-1			; put point at (R5,R6) with color R2
+		ST R5,R5STORE
 		JSR POINT				;
+		LD R5,R5STORE
 
 		JSR LOOP2				;go back to start of y loop
 
@@ -74,6 +78,7 @@ R6STORE	.FILL x0000				;
 
 
 POINT	;sets point (R0,R1) on screen to color (R2), outputs point's address (R0)
+
 		ST R0,R0STORE		; save values
 		ST R2,R2STORE		;
 
@@ -111,7 +116,7 @@ RAND	; generates a random (ish) hex number from x0000 to x7FFF, stored in R0
 		LD R2,RAND_MULT		; 
 		AND R0,R0,#0		; 
 		ADD R3,R0,#1		; 
-		ADD R4,R0,#-1		; 	
+		ADD R4,R0,#-1		; 
 RAND1	AND R2,R2,R4		;
 		BRz RAND3			;
 		AND R5,R2,R3		; multiply seed with mult
