@@ -5,28 +5,34 @@ START
 		ADD R3,R3,#1			;
 		ST R3,RAND_LIM			;
 		
-		LD R3,SCREEN_SIZE_I		;
+		LD R3,SCREEN_SIZEX_I	;
 		NOT R3,R3				;
 		ADD R3,R3,#1			;
-		ST R3,SCREEN_SIZE_I		;
+		ST R3,SCREEN_SIZEX_I	;
+
+		LD R3,SCREEN_SIZEY_I	;
+		NOT R3,R3				;
+		ADD R3,R3,#1			;
+		ST R3,SCREEN_SIZEY_I	;
 
 LOOP0	AND R5,R5,#0			; reset y
 		ADD R5,R5,#-1
+
 LOOP1	ADD R5,R5,#1			; step y
 
-		LD R0,SCREEN_SIZE_I		;
+		LD R0,SCREEN_SIZEY_I	;
 		ADD	R0,R5,R0			; reset y if y = screen_size
-		ADD R0,R0,#-1			;
+		ADD R0,R0,#-1
 		BRz LOOP0				;
 
 		AND R6,R6,#0			; reset x
 		ADD R6,R6,#-1			;
 LOOP2	ADD R6,R6,#1			; step x
 
-		LD R0,SCREEN_SIZE_I		;
+		LD R0,SCREEN_SIZEX_I	;
 		ADD	R0,R6,R0			; reset 6 & increment y if x = screen_size
-		ADD R0,R0,#-1			;
-		BRz LOOP1				;		
+		ADD R0,R0,#-1
+		BRz LOOP1				;
 
 		ST R5,R5STORE			;
 		JSR RAND				; get random color
@@ -50,8 +56,10 @@ LOOP2	ADD R6,R6,#1			; step x
 
 
 SCREEN_START .FILL xC000
-SCREEN_SIZE .FILL x0080
-SCREEN_SIZE_I .FILL x0080		; (gets inverted)
+SCREEN_SIZEX .FILL x007F
+SCREEN_SIZEX_I .FILL x007F		; (gets inverted)
+SCREEN_SIZEY .FILL x007C
+SCREEN_SIZEY_I .FILL x007C		; (gets inverted)
 
 RAND_SEED .FILL x0001			; stuff for random nums
 RAND_MULT .FILL x0002			;
@@ -79,7 +87,8 @@ POINT	;sets point (R0,R1) on screen to color (R2), outputs point's address (R0)
 		ST R0,R0STORE		; save values
 		ST R2,R2STORE		;
 
-		LD R2,SCREEN_SIZE	; R1 is already Y value
+		LD R2,SCREEN_SIZEX	; R1 is already Y value
+		ADD R2,R2,#1		; idk why but I have to add one
 		AND R0,R0,#0		; 
 		ADD R3,R0,#1		; 
 		ADD R4,R0,#-1		; 	
