@@ -1,3 +1,3 @@
 script scripts/os
-script scripts/project
+script scripts/p1
 continue
