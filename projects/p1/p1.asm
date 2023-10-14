@@ -2,7 +2,7 @@
 START
 		LD R3,RAND_LIM			;
 		NOT R3,R3				;
-		ADD R3,R3,#1			;
+		ADD R3,R3,#-1			;
 		ST R3,RAND_LIM			;
 		
 		LD R3,SCREEN_SIZEX_I	;
@@ -22,7 +22,6 @@ LOOP1	ADD R5,R5,#1			; step y
 
 		LD R0,SCREEN_SIZEY_I	;
 		ADD	R0,R5,R0			; reset y if y = screen_size
-		ADD R0,R0,#-1
 		BRz LOOP0				;
 
 		AND R6,R6,#0			; reset x
