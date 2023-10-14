@@ -115,21 +115,8 @@ POINT3						;
 
 
 RAND	; generates a random (ish) hex number from x0000 to x7FFF, stored in R0
-		LD R1,RAND_SEED		;
-		LD R2,RAND_MULT		; 
-		AND R0,R0,#0		; 
-		ADD R3,R0,#1		; 
-		ADD R4,R0,#-1		; 
-RAND1	AND R2,R2,R4		;
-		BRz RAND3			;
-		AND R5,R2,R3		; multiply seed with mult
-		BRz RAND2			; explinations are in mult subroutine
-		ADD R0,R0,R1		; did't just call the subroutine because return is lost
-RAND2	ADD R1,R1,R1		;	 
-		ADD R3,R3,R3		;
-		ADD R4,R4,R4		;
-		BRnzp RAND1			;
-RAND3						;
+		LD R0,RAND_SEED
+		ADD R0,R0,R0		; mult seed by 2
 
 		LD R1,RAND_INCR		; add increment
 		ADD R0,R0,R1		;
