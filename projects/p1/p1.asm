@@ -2,7 +2,7 @@
 START
 		LD R3,RAND_LIM			;
 		NOT R3,R3				;
-		ADD R3,R3,#-1			;
+		ADD R3,R3,#1			;
 		ST R3,RAND_LIM			;
 		
 		LD R3,SCREEN_SIZEX_I	;
