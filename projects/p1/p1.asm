@@ -30,7 +30,6 @@ LOOP2	ADD R6,R6,#1			; step x
 
 		LD R0,SCREEN_SIZEX_I	;
 		ADD	R0,R6,R0			; reset 6 & increment y if x = screen_size
-		ADD R0,R0,#-1
 		BRz LOOP1				;
 
 		ST R5,R5STORE			;
@@ -55,8 +54,8 @@ LOOP2	ADD R6,R6,#1			; step x
 
 
 SCREEN_START .FILL xC000
-SCREEN_SIZEX .FILL x007F
-SCREEN_SIZEX_I .FILL x007F		; (gets inverted)
+SCREEN_SIZEX .FILL x0080
+SCREEN_SIZEX_I .FILL x0080		; (gets inverted)
 SCREEN_SIZEY .FILL x007C
 SCREEN_SIZEY_I .FILL x007C		; (gets inverted)
 
@@ -87,7 +86,6 @@ POINT	;sets point (R0,R1) on screen to color (R2), outputs point's address (R0)
 		ST R2,R2STORE		;
 
 		LD R2,SCREEN_SIZEX	; R1 is already Y value
-		ADD R2,R2,#1		; idk why but I have to add one
 		AND R0,R0,#0		; 
 		ADD R3,R0,#1		; 
 		ADD R4,R0,#-1		; 	
