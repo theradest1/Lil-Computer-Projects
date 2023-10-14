@@ -32,9 +32,7 @@ LOOP2	ADD R6,R6,#1			; step x
 		ADD	R0,R6,R0			; reset 6 & increment y if x = screen_size
 		BRz LOOP1				;
 
-		ST R5,R5STORE			;
 		JSR RAND				; get random color
-		LD R5,R5STORE			;
 
 		AND R2,R0,#-1			;
 		AND R1,R5,#-1			;
