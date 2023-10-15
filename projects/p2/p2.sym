@@ -1,0 +1,27 @@
+// Symbol table
+// Scope level 0:
+//	Symbol Name       Page Address
+//	----------------  ------------
+//	R3STORE           3013
+//	R4STORE           3014
+//	LOOP              3008
+//	GETKEY            3019
+//	POINT             301D
+//	SCREEN_SIZEX_I    300D
+//	DI_DATA           3018
+//	SCREEN_SIZEY      300E
+//	R5STORE           3015
+//	SCREEN_SIZEX      300C
+//	R6STORE           3016
+//	SCREEN_START      300B
+//	R0STORE           3010
+//	PRINT             301B
+//	START             3000
+//	R1STORE           3011
+//	SCREEN_SIZEY_I    300F
+//	POINT3            302C
+//	POINT2            3028
+//	R2STORE           3012
+//	POINT1            3023
+//	KB_DATA           3017
+

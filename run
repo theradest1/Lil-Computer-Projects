@@ -1,3 +1,2 @@
-script scripts/os
-script scripts/p1
+script load
 continue
