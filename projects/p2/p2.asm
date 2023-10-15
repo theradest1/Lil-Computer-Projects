@@ -8,11 +8,60 @@ START	LD R3,SCREEN_SIZEX_I	;
 		NOT R3,R3				;
 		ADD R3,R3,#1			;
 		ST R3,SCREEN_SIZEY_I	;
-
 LOOP
-		JSR GETKEY
-		JSR PRINT
-		JSR LOOP				;go to loop
+		JSR GETKEY				;get key
+		JSR PRINT				;print key
+
+		;past x pos = R0, past y pos = R1, key = R2, new x pos = R3, new y pos = R4, test keys = R5, changed = R6
+
+		AND R6,R6,#0
+		AND R2,R0,#-1
+		LD R0,POS_X
+		LD R1,POS_Y
+		AND R3,R0,#-1
+		AND R4,R1,#-1
+
+		;test keys
+
+		LD R5,K_W
+		ADD R5,R2,R5			; W (up)
+		BRnp #2
+		ADD R6,R6,#1
+		ADD R4,R4,#-1
+
+		LD R5,K_A
+		ADD R5,R2,R5			; A (left)
+		BRnp #2
+		ADD R6,R6,#1
+		ADD R3,R3,#-1
+
+		LD R5,K_S
+		ADD R5,R2,R5			; S (down)
+		BRnp #2
+		ADD R6,R6,#1
+		ADD R4,R4,#1
+
+		LD R5,K_D
+		ADD R5,R2,R5			; D (right)
+		BRnp #2
+		ADD R6,R6,#1
+		ADD R3,R3,#1
+
+		; apply changes
+
+		ADD R6,R6,#0			; update if pos is changed
+		BRnz #8
+		ST R3,POS_X
+		ST R4,POS_Y			
+		LD R2,BGD_COL			;clear last pos
+		JSR POINT
+
+		LD R0,POS_X
+		LD R1,POS_Y				;print new pos
+		LD R2,SNK_COL
+		JSR POINT
+
+		JSR LOOP				;loop
 
 
 
@@ -37,7 +86,19 @@ R5STORE	.FILL x0000				;
 R6STORE	.FILL x0000				;
 
 KB_DATA .FILL xFE02				;key press data
+KB_STE  .FILL xFE00				;key press state
 DI_DATA .FILL xFE06				;print mem address
+
+POS_X	.FILL x0020
+POS_Y	.FILL x0020
+
+SNK_COL .FILL xFFFF
+BGD_COL .FILL x0000
+
+K_W		.FILL xFF89		;x0077
+K_A		.FILL xFF9F		;x0061
+K_S		.FILL xFF8D		;x0073		Inverted key codes
+K_D		.FILL xFF9C		;x0064
 
 
 
@@ -45,7 +106,9 @@ DI_DATA .FILL xFE06				;print mem address
 ;Functions --------------- Generally uses R0-R5
 
 GETKEY	;gets key - in R0
-		LDI R0,KB_DATA			;get keypress
+		LDI R0,KB_STE		; wait for a keystroke
+		BRzp GETKEY
+		LDI R0,KB_DATA		; read it and return
 		RET
 
 PRINT	; idk yet - uses data in R0
