@@ -555,8 +555,7 @@ OS_IN_SAVE_R7   .BLKW 1
 MASK_HI         .FILL x7FFF
 LOW_8_BITS      .FILL x00FF
 TIM_INIT        .FILL #40
-MPR_INIT	.FILL xFFFF	; user can access everything
-;MPR_INIT	.FILL x0FF8	; user can access x3000 to xbfff
+MPR_INIT		.FILL xFFFF	; user can access everything
 USER_CODE_ADDR	.FILL x3000	; user code starts at x3000
 
         

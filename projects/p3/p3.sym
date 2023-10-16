@@ -1,0 +1,39 @@
+// Symbol table
+// Scope level 0:
+//	Symbol Name       Page Address
+//	----------------  ------------
+//	K_S               3047
+//	R3STORE           3037
+//	BGD_COL           3041
+//	R4STORE           3038
+//	LOOP              3008
+//	GETKEY            3049
+//	POINT             304F
+//	SCREEN_SIZEX_I    3031
+//	DI_DATA           303D
+//	SCORE             3044
+//	SCREEN_SIZEY      3032
+//	R5STORE           3039
+//	SCREEN_SIZEX      3030
+//	K_D               3048
+//	K_A               3046
+//	R6STORE           303A
+//	POS_Y             303F
+//	FOOD_Y            3043
+//	POS_X             303E
+//	FOOD_X            3042
+//	SCREEN_START      302F
+//	R0STORE           3034
+//	PRINT             304D
+//	START             3000
+//	SNK_COL           3040
+//	R1STORE           3035
+//	SCREEN_SIZEY_I    3033
+//	POINT3            305E
+//	KB_STE            303C
+//	POINT2            305A
+//	R2STORE           3036
+//	POINT1            3055
+//	K_W               3045
+//	KB_DATA           303B
+
