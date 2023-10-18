@@ -8,6 +8,27 @@ START	LD R3,SCREEN_SIZEX_I	;
 		NOT R3,R3				;
 		ADD R3,R3,#1			;
 		ST R3,SCREEN_SIZEY_I	;
+
+		LD R3,RAND_LIM			;
+		NOT R3,R3				;
+		ADD R3,R3,#1			;
+		ST R3,RAND_LIM			;
+
+
+		JSR RAND
+		LD R1,RAND_MASK
+		AND R0,R0,R1
+		ST R0,FOOD_X			;get new food pos
+		JSR RAND
+		LD R1,RAND_MASK
+		AND R0,R0,R1
+		ST R0,FOOD_Y
+
+		LD R0,K_D
+
+		LD R0,FOOD_X
+		LD R1,FOOD_Y			;print food
+		LD R2,FOOD_COL
 LOOP
 		JSR GETKEY				;get key
 		JSR PRINT				;print key
@@ -63,9 +84,6 @@ LOOP
 
 		JSR LOOP				;loop
 
-
-
-
 ; data ----------------
 
 
@@ -94,21 +112,24 @@ POS_Y	.FILL x0020
 
 SNK_COL .FILL xFFFF
 BGD_COL .FILL x0000
+FOOD_COL .FILL x00FF
 
 FOOD_X	.FILL x0040
 FOOD_Y	.FILL x0040
 
-SCORE	.FILL x0000
+K_W		.FILL xFF89				;x0077
+K_A		.FILL xFF9F				;x0061
+K_S		.FILL xFF8D				;x0073		Inverted key codes
+K_D		.FILL xFF9C				;x0064
 
-K_W		.FILL xFF89		;x0077
-K_A		.FILL xFF9F		;x0061
-K_S		.FILL xFF8D		;x0073		Inverted key codes
-K_D		.FILL xFF9C		;x0064
+RAND_SEED .FILL x0001			; stuff for random nums
+RAND_INCR .FILL xD900			;
+RAND_LIM .FILL x7FFF			; (gets inverted)
+
+RAND_MASK .FILL x007F			;AND with rand to get 0-128
 
 
-
-
-;Functions --------------- Generally uses R0-R5
+;util functions --------------- Generally uses R0-R5
 
 GETKEY	;gets key - in R0
 		LDI R0,KB_STE		; wait for a keystroke
@@ -153,4 +174,27 @@ POINT3						;
 
 		RET
 
-		.end
+
+
+RAND	; generates a random (ish) hex number from x0000 to x7FFF, stored in R0
+		LD R0,RAND_SEED
+		ADD R0,R0,R0		; mult seed by 2
+
+		LD R1,RAND_INCR		; add increment
+		ADD R0,R0,R1		;
+
+		LD R1,RAND_LIM		; 
+		ADD R1,R0,R1		; wrap if bigger than RAND_LIM
+		BRn #1				;
+		AND R0,R1,#-1		;
+
+		ST R0,RAND_SEED		; store seed
+
+		RET
+
+
+
+
+
+
+		.end ; KEEP AT THE END - errors from this so far = 3
