@@ -82,6 +82,8 @@ LOOP
 		LD R2,SNK_COL
 		JSR POINT
 
+
+
 		JSR LOOP				;loop
 
 ; data ----------------
@@ -126,7 +128,7 @@ RAND_SEED .FILL x0001			; stuff for random nums
 RAND_INCR .FILL xD900			;
 RAND_LIM .FILL x7FFF			; (gets inverted)
 
-RAND_MASK .FILL x007F			;AND with rand to get 0-128
+RAND_MASK .FILL x003F			;AND with rand to get 0-64
 
 
 ;util functions --------------- Generally uses R0-R5
@@ -197,4 +199,4 @@ RAND	; generates a random (ish) hex number from x0000 to x7FFF, stored in R0
 
 
 
-		.end ; KEEP AT THE END - errors from this so far = 3
+		.end				; KEEP AT THE END - errors from this so far = 3
