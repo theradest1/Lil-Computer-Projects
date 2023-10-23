@@ -14,22 +14,7 @@ START	LD R3,SCREEN_SIZEX_I	;
 		ADD R3,R3,#1			;
 		ST R3,RAND_LIM			;
 
-
-		JSR RAND
-		LD R1,RAND_MASK
-		AND R0,R0,R1
-		ST R0,FOOD_X			;get new food pos
-		JSR RAND
-		LD R1,RAND_MASK
-		AND R0,R0,R1
-		ST R0,FOOD_Y
-
-		LD R0,K_D
-
-		LD R0,FOOD_X
-		LD R1,FOOD_Y			;print food
-		LD R2,FOOD_COL 
-		JSR POINT
+		JSR NEWFOOD
 LOOP
 		LD R0,DELAY
 DELAYL	ADD R0,R0,#-1			; a delay so that the snake doesnt go so fast
@@ -89,8 +74,6 @@ DELAYL	ADD R0,R0,#-1			; a delay so that the snake doesnt go so fast
 		ADD R4,R4,R5
 		BRz DEATH
 
-		
-
 		;visual
 		LD R2,BGD_COL			;clear last pos (past pos was stored near loop start)
 		JSR POINT
@@ -108,12 +91,6 @@ DELAYL	ADD R0,R0,#-1			; a delay so that the snake doesnt go so fast
 
 ; data ----------------
 
-
-DEATH	TRAP x25
-		
-
-
-
 SCREEN_START .FILL xC000
 SCREEN_SIZEX .FILL x0080
 SCREEN_SIZEX_I .FILL x0080		; (gets inverted)
@@ -128,6 +105,8 @@ R4STORE	.FILL x0000				;
 R5STORE	.FILL x0000				;
 R6STORE	.FILL x0000				;
 
+JPSTORE	.FILL x0000				; store R7 here when nesting subroutines
+
 KB_DATA .FILL xFE02				;key press data
 KB_STE  .FILL xFE00				;key press state
 DI_DATA .FILL xFE06				;print mem address
@@ -140,7 +119,9 @@ BGD_COL .FILL x0000
 FOOD_COL .FILL x00FF
 
 FOOD_X	.FILL x0040
+FOOD_X_I	.FILL x0040
 FOOD_Y	.FILL x0040
+FOOD_Y_I	.FILL x0040
 
 K_W		.FILL xFF89				;x0077
 K_A		.FILL xFF9F				;x0061
@@ -155,6 +136,37 @@ RAND_MASK .FILL x003F			;AND with rand to get 0-64
 
 DELAY	.FILL x0F00				;the delay in the program so it doesnt zoom so fast
 
+;game functions
+DEATH	TRAP x25
+		
+NEWFOOD 
+		ST R7,JPSTORE			;store return
+
+		JSR RAND
+		LD R1,RAND_MASK
+		AND R0,R0,R1
+		ST R0,FOOD_X			;get new food pos
+		JSR RAND
+		LD R1,RAND_MASK
+		AND R0,R0,R1
+		ST R0,FOOD_Y
+
+		LD R0,FOOD_X
+		LD R1,FOOD_Y			;print food
+		LD R2,FOOD_COL 
+		JSR POINT
+		
+		LD R0,FOOD_X			
+		NOT R0,R0				;preprocess negative food pos
+		ADD R0,R0,#1			
+		ST R0,FOOD_X_I			
+		LD R0,FOOD_Y			
+		NOT R0,R0				
+		ADD R0,R0,#1			
+		ST R0,FOOD_Y_I			
+
+		LD R7,JPSTORE			;return
+		RET
 
 ;util functions --------------- Generally uses R0-R5
 
