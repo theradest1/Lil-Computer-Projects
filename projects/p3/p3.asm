@@ -14,7 +14,15 @@ START	LD R3,SCREEN_SIZEX_I	;
 		ADD R3,R3,#1			;
 		ST R3,RAND_LIM			;
 
+		AND R1,R1,#0
+WAIT	JSR GETKEYQ
+		ADD R1,R1,#1			;get random seed from player delay at start
+		AND R0,R0,#-1
+		BRz WAIT
+		ST R1,RAND_SEED
+
 		JSR NEWFOOD
+
 LOOP
 		LD R0,DELAY
 DELAYL	ADD R0,R0,#-1			; a delay so that the snake doesnt go so fast
@@ -78,9 +86,20 @@ DELAYL	ADD R0,R0,#-1			; a delay so that the snake doesnt go so fast
 		LD R2,BGD_COL			;clear last pos (past pos was stored near loop start)
 		JSR POINT
 
+		; check food
 		LD R0,POS_X
-		LD R1,POS_Y				;print new pos
-		LD R2,SNK_COL
+		LD R1,POS_Y				
+		LD R3,FOOD_X_I
+		LD R4,FOOD_Y_I
+		ADD R3,R0,R3
+		BRnp #3 
+		ADD R4,R1,R4
+		BRnp #1
+		JSR NEWFOOD
+
+		LD R0,POS_X
+		LD R1,POS_Y	
+		LD R2,SNK_COL			;print new pos
 		JSR POINT
 
 
@@ -128,13 +147,13 @@ K_A		.FILL xFF9F				;x0061
 K_S		.FILL xFF8D				;x0073		Inverted key codes
 K_D		.FILL xFF9C				;x0064
 
-RAND_SEED .FILL x0001			; stuff for random nums
+RAND_SEED .FILL x0050			; stuff for random nums
 RAND_INCR .FILL xD900			;
 RAND_LIM .FILL x7FFF			; (gets inverted)
 
 RAND_MASK .FILL x003F			;AND with rand to get 0-64
 
-DELAY	.FILL x0F00				;the delay in the program so it doesnt zoom so fast
+DELAY	.FILL x5000				;the delay in the program so it doesnt zoom so fast
 
 ;game functions
 DEATH	TRAP x25
@@ -157,7 +176,7 @@ NEWFOOD
 		JSR POINT
 		
 		LD R0,FOOD_X			
-		NOT R0,R0				;preprocess negative food pos
+		NOT R0,R0				;preprocess negative food position
 		ADD R0,R0,#1			
 		ST R0,FOOD_X_I			
 		LD R0,FOOD_Y			
