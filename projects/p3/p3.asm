@@ -29,9 +29,14 @@ START	LD R3,SCREEN_SIZEX_I	;
 		LD R0,FOOD_X
 		LD R1,FOOD_Y			;print food
 		LD R2,FOOD_COL
+		JSR POINT
 LOOP
-		JSR GETKEY				;get key
-		JSR PRINT				;print key
+		LD R0,DELAY
+DELAYL	ADD R0,R0,#-1			; a delay so that the snake doesnt go so fast
+		BRp DELAYL
+
+		JSR GETKEYQ				;get key
+		;JSR PRINT				;print key
 
 		;past x pos = R0, past y pos = R1, key = R2, new x pos = R3, new y pos = R4, test keys = R5, changed = R6
 
@@ -84,6 +89,8 @@ LOOP
 
 
 
+
+
 		JSR LOOP				;loop
 
 ; data ----------------
@@ -130,12 +137,18 @@ RAND_LIM .FILL x7FFF			; (gets inverted)
 
 RAND_MASK .FILL x003F			;AND with rand to get 0-64
 
+DELAY	.FILL x0F00				;the delay in the program so it doesnt zoom so fast
+
 
 ;util functions --------------- Generally uses R0-R5
 
 GETKEY	;gets key - in R0
 		LDI R0,KB_STE		; wait for a keystroke
 		BRzp GETKEY
+		LDI R0,KB_DATA		; read it and return
+		RET
+
+GETKEYQ	;gets key that is leftover in memory - in R0
 		LDI R0,KB_DATA		; read it and return
 		RET
 
@@ -199,4 +212,4 @@ RAND	; generates a random (ish) hex number from x0000 to x7FFF, stored in R0
 
 
 
-		.end				; KEEP AT THE END - errors from this so far = 3
+		.end				; KEEP AT THE END - errors from me being dumb and forgetting so far = 3
