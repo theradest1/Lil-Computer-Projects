@@ -28,7 +28,7 @@ START	LD R3,SCREEN_SIZEX_I	;
 
 		LD R0,FOOD_X
 		LD R1,FOOD_Y			;print food
-		LD R2,FOOD_COL
+		LD R2,FOOD_COL 
 		JSR POINT
 LOOP
 		LD R0,DELAY
@@ -51,35 +51,48 @@ DELAYL	ADD R0,R0,#-1			; a delay so that the snake doesnt go so fast
 
 		LD R5,K_W
 		ADD R5,R2,R5			; W (up)
-		BRnp #2
-		ADD R6,R6,#1
+		BRnp #1
 		ADD R4,R4,#-1
 
 		LD R5,K_A
 		ADD R5,R2,R5			; A (left)
-		BRnp #2
-		ADD R6,R6,#1
+		BRnp #1
 		ADD R3,R3,#-1
 
 		LD R5,K_S
 		ADD R5,R2,R5			; S (down)
-		BRnp #2
-		ADD R6,R6,#1
+		BRnp #1
 		ADD R4,R4,#1
 
 		LD R5,K_D
 		ADD R5,R2,R5			; D (right)
-		BRnp #2
-		ADD R6,R6,#1
+		BRnp #1
 		ADD R3,R3,#1
 
 		; apply changes
-
-		ADD R6,R6,#0			; update if pos is changed
-		BRnz #8
 		ST R3,POS_X
-		ST R4,POS_Y			
-		LD R2,BGD_COL			;clear last pos
+		ST R4,POS_Y		
+
+
+		;check bounds
+		AND R3,R3,#-1			;left
+		BRn DEATH
+
+		AND R4,R4,#-1			;top
+		BRn DEATH
+
+		LD R5,SCREEN_SIZEX_I	;right
+		ADD R3,R3,R5
+		BRz DEATH
+
+		LD R5,SCREEN_SIZEY_I	;bottom
+		ADD R4,R4,R5
+		BRz DEATH
+
+		
+
+		;visual
+		LD R2,BGD_COL			;clear last pos (past pos was stored near loop start)
 		JSR POINT
 
 		LD R0,POS_X
@@ -95,6 +108,9 @@ DELAYL	ADD R0,R0,#-1			; a delay so that the snake doesnt go so fast
 
 ; data ----------------
 
+
+DEATH	TRAP x25
+		
 
 
 
