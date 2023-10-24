@@ -25,49 +25,71 @@ WAIT	JSR GETKEYQ
 
 LOOP
 		LD R0,DELAY
-DELAYL	ADD R0,R0,#-1			; a delay so that the snake doesnt go so fast
+DELAYL	ADD R0,R0,#-1			; a delay so that the snake doesnt go zoom
 		BRp DELAYL
 
-		JSR GETKEYQ				;get key
-		;JSR PRINT				;print key
+		;get new direction
+		LDI R0,KB_STE
+		BRz ENDKEY				;skip key finding if status is zero
+		JSR GETKEYQ
 
-		;past x pos = R0, past y pos = R1, key = R2, new x pos = R3, new y pos = R4, test keys = R5, changed = R6
+		;R0 = pressed key, R1 = tested key, R2 = current x vel, R3 = current y vel, R4 = new x vel, R5 = new y vel
 
-		AND R6,R6,#0
-		AND R2,R0,#-1
-		LD R0,POS_X
-		LD R1,POS_Y
-		AND R3,R0,#-1
-		AND R4,R1,#-1
+		LD R2,VEL_X
+		LD R3,VEL_Y
+		AND R4,R4,#0
+		AND R5,R5,#0
 
-		;test keys
+		LD R1,K_W
+		ADD R1,R0,R1			; W (up)
+		BRnp #1
+		ADD R5,R5,#-1
 
-		LD R5,K_W
-		ADD R5,R2,R5			; W (up)
+		LD R1,K_A
+		ADD R1,R0,R1			; A (left)
 		BRnp #1
 		ADD R4,R4,#-1
 
-		LD R5,K_A
-		ADD R5,R2,R5			; A (left)
+		LD R1,K_S
+		ADD R1,R0,R1			; S (down)
 		BRnp #1
-		ADD R3,R3,#-1
+		ADD R5,R5,#1
 
-		LD R5,K_S
-		ADD R5,R2,R5			; S (down)
+		LD R1,K_D
+		ADD R1,R0,R1			; D (right)
 		BRnp #1
 		ADD R4,R4,#1
 
-		LD R5,K_D
-		ADD R5,R2,R5			; D (right)
-		BRnp #1
-		ADD R3,R3,#1
+		;test if new velocity is valid
+		ADD R0,R2,R4
+		BRz ENDKEY
+		ADD R0,R3,R5
+		BRz ENDKEY
 
-		; apply changes
+		ST R4,VEL_X
+		ST R5,VEL_Y
+
+		;JSR PRINT				;print key
+
+ENDKEY
+
+		;past x pos = R0, past y pos = R1, new x pos = R3, new y pos = R4
+
+		LD R0,POS_X
+		LD R1,POS_Y
+		LD R5,VEL_X
+		LD R6,VEL_Y
+		AND R3,R0,#-1
+		AND R4,R1,#-1
+
+		; apply velocity
+		ADD R3,R3,R5
+		ADD R4,R4,R6
 		ST R3,POS_X
 		ST R4,POS_Y		
 
 
-		;check bounds
+		; check bounds
 		AND R3,R3,#-1			;left
 		BRn DEATH
 
@@ -102,10 +124,6 @@ DELAYL	ADD R0,R0,#-1			; a delay so that the snake doesnt go so fast
 		LD R2,SNK_COL			;print new pos
 		JSR POINT
 
-
-
-
-
 		JSR LOOP				;loop
 
 ; data ----------------
@@ -124,7 +142,8 @@ R4STORE	.FILL x0000				;
 R5STORE	.FILL x0000				;
 R6STORE	.FILL x0000				;
 
-JPSTORE	.FILL x0000				; store R7 here when nesting subroutines
+SBSTORE .FILL x0000				; store R7 here when nesting subroutines (for subroutines like print point)
+UTSTORE	.FILL x0000				; store R7 here when nesting subroutines (for utilities like multiply)
 
 KB_DATA .FILL xFE02				;key press data
 KB_STE  .FILL xFE00				;key press state
@@ -132,6 +151,8 @@ DI_DATA .FILL xFE06				;print mem address
 
 POS_X	.FILL x0020
 POS_Y	.FILL x0020
+VEL_X	.FILL x0001
+VEL_Y	.FILL x0000
 
 SNK_COL .FILL xFFFF
 BGD_COL .FILL x0000
@@ -159,15 +180,17 @@ DELAY	.FILL x5000				;the delay in the program so it doesnt zoom so fast
 DEATH	TRAP x25
 		
 NEWFOOD 
-		ST R7,JPSTORE			;store return
+		ST R7,SBSTORE			;store return
 
 		JSR RAND
 		LD R1,RAND_MASK
 		AND R0,R0,R1
+		ADD R0,R0,#10
 		ST R0,FOOD_X			;get new food pos
 		JSR RAND
 		LD R1,RAND_MASK
 		AND R0,R0,R1
+		ADD R0,R0,#10
 		ST R0,FOOD_Y
 
 		LD R0,FOOD_X
@@ -184,18 +207,18 @@ NEWFOOD
 		ADD R0,R0,#1			
 		ST R0,FOOD_Y_I			
 
-		LD R7,JPSTORE			;return
+		LD R7,SBSTORE			;return
 		RET
 
 ;util functions --------------- Generally uses R0-R5
 
-GETKEY	;gets key - in R0
+GETKEYW	;get key wait - in R0
 		LDI R0,KB_STE		; wait for a keystroke
-		BRzp GETKEY
+		BRzp GETKEYW
 		LDI R0,KB_DATA		; read it and return
 		RET
 
-GETKEYQ	;gets key that is leftover in memory - in R0
+GETKEYQ	;get key quick - in R0
 		LDI R0,KB_DATA		; read it and return
 		RET
 
