@@ -25,8 +25,12 @@ WAIT	JSR GETKEYQ
 
 LOOP
 		LD R0,DELAY
-DELAYL	ADD R0,R0,#-1			; a delay so that the snake doesnt go zoom
-		BRp DELAYL
+DELAYL1	ADD R0,R0,#-1			; a delay so that the snake doesnt go zoom
+		BRp DELAYL1
+		
+		LD R0,DELAY
+DELAYL2	ADD R0,R0,#-1			; a delay so that the snake doesnt go zoom
+		BRp DELAYL2
 
 		;get new direction
 		LDI R0,KB_STE
@@ -202,18 +206,17 @@ RAND_SEED .FILL x0050			; stuff for random nums
 RAND_INCR .FILL xD900			;
 RAND_LIM .FILL x7FFF			; (gets inverted)
 
-RAND_MASK .FILL x003F			;AND with rand to get 0-64
+RAND_MASK .FILL x001F			;AND with rand to get 0-64
 
-DELAY	.FILL x7000				;the delay in the program so it doesnt zoom so fast
+DELAY	.FILL x5000				;the delay in the program so it doesnt zoom so fast
 
 ;game functions
 DEATH	TRAP x25
 
 
-
 INCRSNAKE	;increments the snake size
 		LD R0,SNK_LEN
-		ADD R0,R0,#6
+		ADD R0,R0,#2
 		ST R0,SNK_LEN
 
 		NOT R0,R0
@@ -235,11 +238,6 @@ NEWFOOD
 		AND R0,R0,R1
 		ADD R0,R0,#10
 		ST R0,FOOD_Y
-
-		LD R0,FOOD_X
-		LD R1,FOOD_Y			;print food
-		LD R2,FOOD_COL 
-		JSR POINT
 		
 		LD R0,FOOD_X			
 		NOT R0,R0				;preprocess negative food position
@@ -248,7 +246,19 @@ NEWFOOD
 		LD R0,FOOD_Y			
 		NOT R0,R0				
 		ADD R0,R0,#1			
-		ST R0,FOOD_Y_I			
+		ST R0,FOOD_Y_I		
+		
+		LD R7,SBSTORE
+		LD R0,FOOD_X
+		LD R1,FOOD_Y
+		JSR POINTADDR
+		LDR R0,R0,#0			;check if new food position is on somethning else
+		BRnp NEWFOOD
+
+		LD R0,FOOD_X
+		LD R1,FOOD_Y			;print food
+		LD R2,FOOD_COL 
+		JSR POINT
 
 		LD R7,SBSTORE			;return
 		RET
