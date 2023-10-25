@@ -25,12 +25,10 @@ WAIT	JSR GETKEYQ
 
 LOOP
 		LD R0,DELAY
-DELAYL1	ADD R0,R0,#-1			; a delay so that the snake doesnt go zoom
-		BRp DELAYL1
-		
-		LD R0,DELAY
-DELAYL2	ADD R0,R0,#-1			; a delay so that the snake doesnt go zoom
-		BRp DELAYL2
+DELAYL	ADD R0,R0,#-1			; a delay so that the snake doesnt go zoom
+		;LDI R0,KB_STE
+		;BRnp #1
+		BRp DELAYL
 
 		;get new direction
 		LDI R0,KB_STE
