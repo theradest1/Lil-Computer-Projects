@@ -107,13 +107,14 @@ ENDKEY
 
 		JSR POINTADDR
 		LDR R0,R0,#0			;get color at to-be point
-		BRz #7					;skip checks if color is 0
+		BRz #8					;skip checks if color is 0 INCREASE IF CHANGES TO THIS CHUNK IS MADE
 		LD R1,SNK_COL_I			; hit self
 		ADD R1,R0,R1
 		BRz DEATH
 		LD R1,FOOD_COL_I		; eat food
 		ADD R1,R0,R1
-		BRnp #1
+		BRnp #2
+		JSR INCRSNAKE
 		JSR NEWFOOD
 
 		LD R0,POS_X
@@ -203,11 +204,24 @@ RAND_LIM .FILL x7FFF			; (gets inverted)
 
 RAND_MASK .FILL x003F			;AND with rand to get 0-64
 
-DELAY	.FILL x5000				;the delay in the program so it doesnt zoom so fast
+DELAY	.FILL x7000				;the delay in the program so it doesnt zoom so fast
 
 ;game functions
 DEATH	TRAP x25
+
+
+
+INCRSNAKE	;increments the snake size
+		LD R0,SNK_LEN
+		ADD R0,R0,#6
+		ST R0,SNK_LEN
+
+		NOT R0,R0
+		ADD R0,R0,#1
+		ST R0,SNK_LEN_I
 		
+		RET
+
 NEWFOOD 
 		ST R7,SBSTORE			;store return
 
