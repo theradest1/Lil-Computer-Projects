@@ -48,11 +48,11 @@ DELAYL	ADD R0,R0,#-1			; a delay so that the game is a little slower
 		ST R2,PLAYER_VEL
 
 ENDKEY
-		;past x pos = R0, past y pos = R1, new x pos = R3, new y pos = R4
-
+		
+		
 		
 
-		JSR LOOP				;loop
+		BRnzp LOOP				;loop
 
 ;game functions --------------------
 
@@ -110,39 +110,10 @@ GETKEYQ	;get key quick - in R0
 		LDI R0,KB_DATA		; read it and return
 		RET
 
-PRINT	; idk yet - uses data in R0
+PRINT	; prints R0 to the console
 		STI R0,DI_DATA
 		RET
 		
-POINTADDR	;gets address at point (R0,R1), outputs address in R0
-		
-		ST R0,R0STORE		; save values
-		ST R2,R2STORE		;
-
-		LD R2,SCREEN_SIZEX	; R1 is already Y value
-		AND R0,R0,#0		; 
-		ADD R3,R0,#1		; 
-		ADD R4,R0,#-1		; 	
-PNTAD1	AND R2,R2,R4		;
-		BRz PNTAD3			;
-		AND R5,R2,R3		; multiply hight with screen size
-		BRz PNTAD2			; explinations are in mult subroutine
-		ADD R0,R0,R1		; should move this to the mult subroutine, but I'm lazy
-PNTAD2	ADD R1,R1,R1		;	 
-		ADD R3,R3,R3		;
-		ADD R4,R4,R4		;
-		BRnzp PNTAD1		;
-PNTAD3						;
-		
-		AND R1,R0,#-1		;
-		LD R0,R0STORE		; load address and color
-		LD R2,R2STORE		;
-		ADD R0,R0,R1		;
-		LD R1,SCREEN_START
-		ADD R0,R0,R1
-
-		RET
-
 POINT	;sets point (R0,R1) on screen to color (R2), outputs point's address (R0)
 
 		ST R0,R0STORE		; save values
@@ -173,6 +144,25 @@ POINT3						;
 		STR R2,R0,#0		; set color (R2) at mem[R0]
 
 		RET
+		
+
+MULT	;multiplication - input R1, R2, output R0
+		AND R0,R0,#0	; result
+		ADD R3,R0,#1	; bit test mask
+		ADD R4,R0,#-1	; end condition mask	
+
+MULT1	AND R2,R2,R4	; any bits left
+		BRz MULT3		;
+		AND R5,R2,R3	; test bit
+		BRz MULT2		;
+		ADD R0,R0,R1	; add mult to result
+
+MULT2	ADD R1,R1,R1	; shift mult bits
+		ADD R3,R3,R3	;
+		ADD R4,R4,R4	;
+		BRnzp MULT1		; keep going
+
+MULT3	RET				; finished
 
 
 		.end				; KEEP AT THE END - errors from me being dumb and forgetting so far = 3
