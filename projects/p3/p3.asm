@@ -206,7 +206,7 @@ RAND_SEED .FILL x0050			; stuff for random nums
 RAND_INCR .FILL xD900			;
 RAND_LIM .FILL x7FFF			; (gets inverted)
 
-RAND_MASK .FILL x001F			;AND with rand to get 0-64
+RAND_MASK .FILL x000F			;AND with rand to get 0-64
 
 DELAY	.FILL x5000				;the delay in the program so it doesnt zoom so fast
 
@@ -248,10 +248,10 @@ NEWFOOD
 		ADD R0,R0,#1			
 		ST R0,FOOD_Y_I		
 		
-		LD R7,SBSTORE
 		LD R0,FOOD_X
 		LD R1,FOOD_Y
 		JSR POINTADDR
+		LD R7,SBSTORE
 		LDR R0,R0,#0			;check if new food position is on somethning else
 		BRnp NEWFOOD
 
