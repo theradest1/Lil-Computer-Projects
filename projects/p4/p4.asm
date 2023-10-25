@@ -9,31 +9,23 @@ START	LD R3,SCREEN_SIZEX_I	;
 		ADD R3,R3,#1			;
 		ST R3,SCREEN_SIZEY_I	;
 
-		LD R3,RAND_LIM			;
-		NOT R3,R3				;
-		ADD R3,R3,#1			;
-		ST R3,RAND_LIM			;
-
-		AND R1,R1,#0
-WAIT	JSR GETKEYQ
-		ADD R1,R1,#1			;get random seed from player delay at start
-		AND R0,R0,#-1
-		BRz WAIT
-		ST R1,RAND_SEED
-
 LOOP
 		LD R0,DELAY
-DELAYL	ADD R0,R0,#-1			; a delay so that the game is a little slower
+DELAYL	ADD R0,R0,#-1			; a delay so that the game is slower
 		BRp DELAYL
 
 		;key press
 		LDI R0,KB_STE
-		BRz ENDKEY				;skip key finding if status is zero
+		BRnp #3				;skip key stuff and set vel to 0 if status is zero
+		AND R0,R0,#0
+		ST R0,PLAYER_VEL
+		BRnzp ENDKEY
+		
 		JSR GETKEYQ
 
 		;R0 = pressed key, R1 = tested key, R2 = new velocity
 
-		AND R2,R2,#0
+		AND R2,R2,#0			;set new player vel to 0
 		
 		LD R1,K_A
 		ADD R1,R0,R1			; A (left)
@@ -46,10 +38,25 @@ DELAYL	ADD R0,R0,#-1			; a delay so that the game is a little slower
 		BRnp #2
 		ADD R2,R2,#1
 		ST R2,PLAYER_VEL
-
-ENDKEY
 		
+ENDKEY		
+		;clear last player pos
+		LD R0,PLAYER_POS
+		LD R1,PLAYER_Y
+		LD R2,BGD_COL
+		JSR POINT
 		
+		;apply player velocity
+		LD R0,PLAYER_POS
+		LD R1,PLAYER_VEL
+		ADD R0,R0,R1
+		ST R0,PLAYER_POS
+		
+		;print new player pos
+		LD R0,PLAYER_POS
+		LD R1,PLAYER_Y
+		LD R2,PLAYER_COL
+		JSR POINT
 		
 
 		BRnzp LOOP				;loop
@@ -81,6 +88,7 @@ KB_STE  .FILL xFE00				;key press state
 DI_DATA .FILL xFE06				;print mem address
 
 PLAYER_POS	.FILL x0005
+PLAYER_Y	.FILL x0078
 PLAYER_VEL	.FILL x0000
 
 BALL_POS_X	.FILL x0009
@@ -89,7 +97,7 @@ BALL_VEL_X	.FILL x0001
 BALL_VEL_Y	.FILL x0001
 
 BGD_COL .FILL x0000
-BGD_COL_I .FILL x0000
+PLAYER_COL	.FILL xFFFF
 
 K_A		.FILL xFF9F				;x0061		Inverted key codes
 K_D		.FILL xFF9C				;x0064
@@ -113,11 +121,9 @@ GETKEYQ	;get key quick - in R0
 PRINT	; prints R0 to the console
 		STI R0,DI_DATA
 		RET
-		
-POINT	;sets point (R0,R1) on screen to color (R2), outputs point's address (R0)
 
-		ST R0,R0STORE		; save values
-		ST R2,R2STORE		;
+POINTADDR	;get the address from a point on the screen (R0,R1)
+		ST R0,R0STORE		; save x value
 
 		LD R2,SCREEN_SIZEX	; R1 is already Y value
 		AND R0,R0,#0		; 
@@ -141,8 +147,19 @@ POINT3						;
 		LD R1,SCREEN_START
 		ADD R0,R0,R1
 		
-		STR R2,R0,#0		; set color (R2) at mem[R0]
+		RET
+		
 
+POINT	;sets point (R0,R1) on screen to color (R2), outputs point's address (R0)
+		ST R7,R7STORE
+		ST R2,R2STORE
+		
+		JSR POINTADDR 	;get address
+		
+		LD R2,R2STORE
+		STR R2,R0,#0		; set color (R2) at mem[R0]
+		
+		LD R7,R7STORE
 		RET
 		
 
