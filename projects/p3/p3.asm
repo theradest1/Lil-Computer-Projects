@@ -85,9 +85,10 @@ ENDKEY
 		; apply velocity
 		ADD R3,R3,R5
 		ADD R4,R4,R6
+		AND R0,R3,#-1
+		AND R1,R4,#-1
 		ST R3,POS_X
-		ST R4,POS_Y		
-
+		ST R4,POS_Y
 
 		; check bounds
 		AND R3,R3,#-1			;left
@@ -104,18 +105,14 @@ ENDKEY
 		ADD R4,R4,R5
 		BRz DEATH
 
-		;visual
-		LD R2,BGD_COL			;clear last pos (past pos was stored near loop start)
-		JSR POINT
-
-		; check food
-		LD R0,POS_X
-		LD R1,POS_Y				
-		LD R3,FOOD_X_I
-		LD R4,FOOD_Y_I
-		ADD R3,R0,R3
-		BRnp #3 
-		ADD R4,R1,R4
+		JSR POINTADDR
+		LDR R0,R0,#0			;get color at to-be point
+		BRz #7				;skip checks if color is 0
+		LD R1,SNK_COL_I			; hit self
+		ADD R1,R0,R1
+		BRz DEATH
+		LD R1,FOOD_COL_I		; eat food
+		ADD R1,R0,R1
 		BRnp #1
 		JSR NEWFOOD
 
@@ -154,9 +151,16 @@ POS_Y	.FILL x0020
 VEL_X	.FILL x0001
 VEL_Y	.FILL x0000
 
+SNK_STR .FILL x4000				;the start of the snake segments
+SNK_OFF .FILL x0000				;offset of the snake memory
+SNK_LEN	.FILL x0001				;length of snake
+
 SNK_COL .FILL xFFFF
+SNK_COL_I .FILL x0001
 BGD_COL .FILL x0000
+BGD_COL_I .FILL x0000
 FOOD_COL .FILL x00FF
+FOOD_COL_I .FILL xFF01
 
 FOOD_X	.FILL x0040
 FOOD_X_I	.FILL x0040
@@ -226,7 +230,34 @@ PRINT	; idk yet - uses data in R0
 		STI R0,DI_DATA
 		RET
 		
+POINTADDR	;gets address at point (R0,R1), outputs address in R0
+		
+		ST R0,R0STORE		; save values
+		ST R2,R2STORE		;
 
+		LD R2,SCREEN_SIZEX	; R1 is already Y value
+		AND R0,R0,#0		; 
+		ADD R3,R0,#1		; 
+		ADD R4,R0,#-1		; 	
+PNTAD1	AND R2,R2,R4		;
+		BRz PNTAD3			;
+		AND R5,R2,R3		; multiply hight with screen size
+		BRz PNTAD2			; explinations are in mult subroutine
+		ADD R0,R0,R1		; should move this to the mult subroutine, but I'm lazy
+PNTAD2	ADD R1,R1,R1		;	 
+		ADD R3,R3,R3		;
+		ADD R4,R4,R4		;
+		BRnzp PNTAD1		;
+PNTAD3						;
+		
+		AND R1,R0,#-1		;
+		LD R0,R0STORE		; load address and color
+		LD R2,R2STORE		;
+		ADD R0,R0,R1		;
+		LD R1,SCREEN_START
+		ADD R0,R0,R1
+
+		RET
 
 POINT	;sets point (R0,R1) on screen to color (R2), outputs point's address (R0)
 
@@ -241,7 +272,7 @@ POINT1	AND R2,R2,R4		;
 		BRz POINT3			;
 		AND R5,R2,R3		; multiply hight with screen size
 		BRz POINT2			; explinations are in mult subroutine
-		ADD R0,R0,R1		; did't just call the subroutine because return is lost
+		ADD R0,R0,R1		; should move this to the mult subroutine, but I'm lazy
 POINT2	ADD R1,R1,R1		;	 
 		ADD R3,R3,R3		;
 		ADD R4,R4,R4		;
