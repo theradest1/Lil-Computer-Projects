@@ -204,7 +204,7 @@ K_D		.FILL xFF9C				;x0064
 
 RAND_SEED .FILL x0050			; stuff for random nums
 RAND_INCR .FILL xD900			;
-RAND_LIM .FILL x7FFF			; (gets inverted)
+RAND_LIM .FILL x000F ;x7FFF			; (gets inverted)
 
 RAND_MASK .FILL x000F			;AND with rand to get 0-64
 
@@ -343,7 +343,27 @@ POINT3						;
 
 RAND	; generates a random (ish) hex number from x0000 to x7FFF, stored in R0
 		LD R0,RAND_SEED
-		ADD R0,R0,R0		; mult seed by 2
+		ADD R0,R0,R0		; mult seed by 4
+
+		LD R1,RAND_INCR		; add increment
+		ADD R0,R0,R1		;
+
+		LD R1,RAND_LIM		; 
+		ADD R1,R0,R1		; wrap if bigger than RAND_LIM
+		BRn #1				;
+		AND R0,R1,#-1		;
+
+		ADD R0,R0,R0		;
+
+		LD R1,RAND_INCR		; add increment
+		ADD R0,R0,R1		;
+
+		LD R1,RAND_LIM		; 
+		ADD R1,R0,R1		; wrap if bigger than RAND_LIM
+		BRn #1				;
+		AND R0,R1,#-1		;
+
+		ADD R0,R0,R0		; 
 
 		LD R1,RAND_INCR		; add increment
 		ADD R0,R0,R1		;
