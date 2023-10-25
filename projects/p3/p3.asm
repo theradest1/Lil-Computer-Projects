@@ -107,7 +107,7 @@ ENDKEY
 
 		JSR POINTADDR
 		LDR R0,R0,#0			;get color at to-be point
-		BRz #7				;skip checks if color is 0
+		BRz #7					;skip checks if color is 0
 		LD R1,SNK_COL_I			; hit self
 		ADD R1,R0,R1
 		BRz DEATH
@@ -120,6 +120,30 @@ ENDKEY
 		LD R1,POS_Y	
 		LD R2,SNK_COL			;print new pos
 		JSR POINT
+
+		LD R3,SNK_STR			;get last segment point and load into (R0,R1)
+		LD R1,SNK_OFF			
+		ADD R3,R3,R1
+		LDR R0,R3,#0			
+		LDR R1,R3,#1
+		LD R2,BGD_COL			;clear it
+		JSR POINT
+
+		LD R3,SNK_STR			
+		LD R1,SNK_OFF			
+		ADD R3,R3,R1
+		LD R0,POS_X				;overwrite with current pos
+		LD R1,POS_Y	
+		STR R0,R3,#0			
+		STR R1,R3,#1
+
+		LD R0,SNK_OFF
+		ADD R0,R0,#2
+		LD R1,SNK_LEN_I
+		ADD R1,R1,R0			;increment offset (reset if end of snake mem)
+		BRnp #1
+		AND R0,R0,#0
+		ST R0,SNK_OFF
 
 		JSR LOOP				;loop
 
@@ -152,8 +176,9 @@ VEL_X	.FILL x0001
 VEL_Y	.FILL x0000
 
 SNK_STR .FILL x4000				;the start of the snake segments
-SNK_OFF .FILL x0000				;offset of the snake memory
-SNK_LEN	.FILL x0001				;length of snake
+SNK_OFF .FILL x0000				;offset of the snake memory (not the segments)
+SNK_LEN	.FILL x0006				;length of snake memory (not the segments)
+SNK_LEN_I .FILL xFFFA			;length of snake memory (not the segments) (inverted)
 
 SNK_COL .FILL xFFFF
 SNK_COL_I .FILL x0001
