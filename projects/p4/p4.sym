@@ -5,10 +5,10 @@
 //	DEATH             3047
 //	DELAYL            3009
 //	ENDKEY            301C
-//	MULT3             3070
-//	MULT2             306C
-//	MULT              3064
-//	MULT1             3067
+//	MULT3             306F
+//	MULT2             306B
+//	MULT              3063
+//	MULT1             3066
 //	R0STORE           302E
 //	R2STORE           3030
 //	PLAYER_COL        3043
@@ -41,7 +41,7 @@
 //	GETKEYQ           304C
 //	UTSTORE           3037
 //	R7STORE           3035
-//	POINT             305D
+//	POINT             305C
 //	DELAY             3046
 //	BGD_COL           3042
 //	KB_STE            3039

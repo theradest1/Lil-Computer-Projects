@@ -79,6 +79,7 @@ R3STORE	.FILL x0000				; when register-heavy tasks are done I can store them her
 R4STORE	.FILL x0000				;
 R5STORE	.FILL x0000				;
 R6STORE	.FILL x0000				;
+R7STORE	.FILL x0000				;
 
 SBSTORE .FILL x0000				; store R7 here when nesting subroutines (for subroutines like print point)
 UTSTORE	.FILL x0000				; store R7 here when nesting subroutines (for utilities like multiply)
@@ -124,29 +125,18 @@ PRINT	; prints R0 to the console
 
 POINTADDR	;get the address from a point on the screen (R0,R1)
 		ST R0,R0STORE		; save x value
+		ST R7,SBSTORE		;save return
 
-		LD R2,SCREEN_SIZEX	; R1 is already Y value
-		AND R0,R0,#0		; 
-		ADD R3,R0,#1		; 
-		ADD R4,R0,#-1		; 	
-POINT1	AND R2,R2,R4		;
-		BRz POINT3			;
-		AND R5,R2,R3		; multiply hight with screen size
-		BRz POINT2			; explinations are in mult subroutine
-		ADD R0,R0,R1		; should move this to the mult subroutine, but I'm lazy
-POINT2	ADD R1,R1,R1		;	 
-		ADD R3,R3,R3		;
-		ADD R4,R4,R4		;
-		BRnzp POINT1		;
-POINT3						;
+		LD R0,SCREEN_SIZEX	; R1 is already Y value
+		JSR MULT
 		
-		AND R1,R0,#-1		;
-		LD R0,R0STORE		; load address and color
-		LD R2,R2STORE		;
+		AND R1,R0,#-1		; move address to R1
+		LD R0,R0STORE		; add x (R0)
 		ADD R0,R0,R1		;
-		LD R1,SCREEN_START
-		ADD R0,R0,R1
+		LD R1,SCREEN_START	;add the screen start address
+		ADD R0,R0,R1		;
 		
+		LD R7,SBSTORE		;load return
 		RET
 		
 
