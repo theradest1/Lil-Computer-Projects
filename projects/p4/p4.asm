@@ -89,7 +89,7 @@ KB_STE  .FILL xFE00				;key press state
 DI_DATA .FILL xFE06				;print mem address
 
 PLAYER_POS	.FILL x0005
-PLAYER_Y	.FILL x0005;78
+PLAYER_Y	.FILL x0078
 PLAYER_VEL	.FILL x0000
 
 BALL_POS_X	.FILL x0009
@@ -125,7 +125,7 @@ PRINT	; prints R0 to the console
 
 POINTADDR	;get the address from a point on the screen (R0,R1)
 		ST R0,R0STORE		; save x value
-		ST R7,SBSTORE		;save return
+		ST R7,SBSTORE		; save return
 
 		LD R2,SCREEN_SIZEX	; R1 is already Y value
 		JSR MULT
@@ -144,10 +144,49 @@ POINT	;sets point (R0,R1) on screen to color (R2), outputs point's address (R0)
 		ST R7,R7STORE
 		ST R2,R2STORE
 		
-		JSR POINTADDR 	;get address
+		JSR POINTADDR 		;get address
 		
 		LD R2,R2STORE
 		STR R2,R0,#0		; set color (R2) at mem[R0]
+		
+		LD R7,R7STORE
+		RET
+
+POINTG	;set point group - top left = (R0,R1) - (width, height) = (R2,R3) - color = R4
+		ST R7,R7STORE
+		
+		ST R2,R2STORE
+		ST R3,R3STORE		;store values for future use
+		ST R4,R4STORE
+
+		JSR POINTADDR 		;get address of top left
+
+		;(width, height) = (R0,R1), color = R2, current address = R3, yIncr = R4, negative current offset = (R5,R6), negative width = R7
+		ADD R3,R0,#0		;address
+		LD R0,R2STORE		;target width
+		LD R1,R3STORE		;target height
+		LD R2,R4STORE		;color
+		LD R4,SCREEN_SIZEX	;y increment
+		AND R5,R5,#0		;negative current x offset
+		AND R6,R6,#0		;
+		NOT R7,R0			;negative width
+		ADD R7,R7,#1
+
+		ADD	R0,R0,#-1
+		ADD	R1,R1,#-1
+		ADD	R5,R5,#-1		;for the loop start
+		ADD	R6,R6,#-1
+
+POINTGY	
+		ADD R6,R6,#1
+		ADD 
+
+POINTGX
+		
+
+
+		
+
 		
 		LD R7,R7STORE
 		RET
