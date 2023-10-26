@@ -89,7 +89,7 @@ KB_STE  .FILL xFE00				;key press state
 DI_DATA .FILL xFE06				;print mem address
 
 PLAYER_POS	.FILL x0005
-PLAYER_Y	.FILL x0078
+PLAYER_Y	.FILL x0005;78
 PLAYER_VEL	.FILL x0000
 
 BALL_POS_X	.FILL x0009
@@ -127,7 +127,7 @@ POINTADDR	;get the address from a point on the screen (R0,R1)
 		ST R0,R0STORE		; save x value
 		ST R7,SBSTORE		;save return
 
-		LD R0,SCREEN_SIZEX	; R1 is already Y value
+		LD R2,SCREEN_SIZEX	; R1 is already Y value
 		JSR MULT
 		
 		AND R1,R0,#-1		; move address to R1
