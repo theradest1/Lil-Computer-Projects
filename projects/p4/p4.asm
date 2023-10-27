@@ -9,6 +9,21 @@ START	LD R3,SCREEN_SIZEX_I	;
 		ADD R3,R3,#1			;
 		ST R3,SCREEN_SIZEY_I	;
 
+		;set point group - top left = (R0,R1) - (width, height) = (R2,R3) - color = R4
+		AND R0,R0,#0
+		ADD R0,R0,#5
+
+		AND R1,R1,#0
+		ADD R1,R1,#10
+
+		AND R2,R2,#0
+		ADD R2,R2,#10
+
+		AND R3,R3,#0
+		ADD R3,R3,#2
+		LD R4,BLOCK_COL
+		JSR POINTG
+
 LOOP
 		LD R0,DELAY
 DELAYL	ADD R0,R0,#-1			; a delay so that the game is slower
@@ -99,6 +114,7 @@ BALL_VEL_Y	.FILL x0001
 
 BGD_COL .FILL x0000
 PLAYER_COL	.FILL xFFFF
+BLOCK_COL 	.FILL xDDDD
 
 K_A		.FILL xFF9F				;x0061		Inverted key codes
 K_D		.FILL xFF9C				;x0064
@@ -161,33 +177,36 @@ POINTG	;set point group - top left = (R0,R1) - (width, height) = (R2,R3) - color
 
 		JSR POINTADDR 		;get address of top left
 
-		;(width, height) = (R0,R1), color = R2, current address = R3, yIncr = R4, negative current offset = (R5,R6), negative width = R7
+		;(width, height) = (R0,R1), color = R2, current address = R3, junk = R4, negative current offset = (R5,R6), y step = R7
 		ADD R3,R0,#0		;address
 		LD R0,R2STORE		;target width
 		LD R1,R3STORE		;target height
 		LD R2,R4STORE		;color
 		LD R4,SCREEN_SIZEX	;y increment
-		AND R5,R5,#0		;negative current x offset
-		AND R6,R6,#0		;
-		NOT R7,R0			;negative width
-		ADD R7,R7,#1
+		LD R7,SCREEN_SIZEX
 
-		ADD	R0,R0,#-1
-		ADD	R1,R1,#-1
-		ADD	R5,R5,#-1		;for the loop start
-		ADD	R6,R6,#-1
+		AND R6,R6,#0		;
 
 POINTGY	
-		ADD R6,R6,#1
-		ADD 
+		ADD R6,R6,#-1		; increment y
+		ADD R3,R3,R7
 
+		ADD R3,R3,R5		
+		AND R5,R5,#0		; reset x
+		ADD R5,R5,#1
+
+		ADD R4,R1,R6		;check if done
+		BRz POINTGE
 POINTGX
-		
+		ADD R5,R5,#-1		; increment x
+		ADD R3,R3,#1
 
+		STR R2,R3,#0		; set color (R2) at address (R3)
 
-		
-
-		
+		ADD R4,R0,R5
+		BRz POINTGY			; check if x is done
+		BRnzp POINTGX
+POINTGE
 		LD R7,R7STORE
 		RET
 		
