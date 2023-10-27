@@ -103,7 +103,7 @@ BADPOS
 
 		LD R0,BALL_POS_X
 		LD R1,BALL_POS_Y
-		LD R2,BALL_VEL_X	;check horiztonal wall
+		LD R2,BALL_VEL_X	;check new x vel
 		ADD R0,R0,R2
 		JSR POINTADDR		;get color
 		LD R3,MAP_BGD_COL_I
@@ -117,8 +117,11 @@ BADPOS
 
 		LD R0,BALL_POS_X
 		LD R1,BALL_POS_Y
-		LD R2,BALL_VEL_Y	;check horiztonal wall
+		LD R2,BALL_VEL_Y	;check new y vel
 		ADD R1,R1,R2
+		LD R4,SCREEN_SIZEY_I	;check if hit the ground
+		ADD R4,R1,R4		
+		BRz DEATH
 		JSR POINTADDR		;get color
 		LD R3,MAP_BGD_COL_I
 		LDR R0,R0,#0
@@ -194,7 +197,7 @@ BALL_COL 	.FILL x07E0
 K_A		.FILL xFF9F				;x0061		Inverted key codes
 K_D		.FILL xFF9C				;x0064
 
-DELAY	.FILL x3000				;the delay in the program so it doesnt go so fast
+DELAY	.FILL x2000				;the delay in the program so it doesnt go so fast
 
 MAP_WIDTH	.FILL x0054
 MAP_HEIGHT	.FILL x007C
@@ -205,6 +208,7 @@ MAP_WALL_COL	.FILL xC000
 MAP_BRICK_COL	.FILL x0463
 
 ;util functions --------------- Generally uses R0-R5
+DEATH	TRAP x25
 
 GETKEYW	;get key wait - in R0
 		LDI R0,KB_STE		; wait for a keystroke
