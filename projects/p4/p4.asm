@@ -47,25 +47,23 @@ DELAYL	ADD R0,R0,#-1			; a delay so that the game is slower
 		;R0 = pressed key, R1 = tested key, R2 = new velocity
 
 		AND R2,R2,#0			;set new player vel to 0
-		
+		LD R3,PLAYER_SPEED
+		LD R4,PLAYER_SPEED_I
+
 		LD R1,K_A
 		ADD R1,R0,R1			; A (left)
 		BRnp #2
-		ADD R2,R2,#-1
+		ADD R2,R2,R4
 		ST R2,PLAYER_VEL
 
 		LD R1,K_D
 		ADD R1,R0,R1			; D (right)
 		BRnp #2
-		ADD R2,R2,#1
+		ADD R2,R2,R3
 		ST R2,PLAYER_VEL
 		
-ENDKEY		
-		;LD R0,PLAYER_POS
-		;LD R1,PLAYER_Y			;clear last player pos
-		;LD R2,BGD_COL
-		;JSR POINT
-
+ENDKEY
+		;player
 		LD R0,PLAYER_POS
 		LD R1,PLAYER_Y
 		LD R2,PLAYER_WIDTH
@@ -80,22 +78,68 @@ ENDKEY
 
 		;check if new pos is valid
 		LD R1,PLAYER_MIN_X_I
-		ADD R1,R0,R1
+		ADD R1,R0,R1				;min
 		BRn BADPOS
 		
 		LD R1,PLAYER_MAX_X_I
-		ADD R1,R0,R1
-		BRp BADPOS
+		ADD R1,R0,R1				;max
+		BRp BADPOS					
 
-		ST R0,PLAYER_POS
+		ST R0,PLAYER_POS			;store if valid
 BADPOS	
-		
+		;print player new postition
 		LD R0,PLAYER_POS
 		LD R1,PLAYER_Y
 		LD R2,PLAYER_WIDTH
-		LD R3,PLAYER_HEIGHT		;print player new postition
+		LD R3,PLAYER_HEIGHT		
 		LD R4,PLAYER_COL
 		JSR POINTG
+
+		;ball
+		LD R0,BALL_POS_X
+		LD R1,BALL_POS_Y
+		LD R2,MAP_BGD_COL		;clear ball
+		JSR POINT
+
+		LD R0,BALL_POS_X
+		LD R1,BALL_POS_Y
+		LD R2,BALL_VEL_X	;check horiztonal wall
+		ADD R0,R0,R2
+		JSR POINTADDR		;get color
+		LD R3,MAP_BGD_COL_I
+		LDR R0,R0,#0
+		ADD R0,R0,R3
+		BRz #4
+		LD R0,BALL_VEL_X
+		NOT R0,R0
+		ADD R0,R0,#1
+		ST R0,BALL_VEL_X
+
+		LD R0,BALL_POS_X
+		LD R1,BALL_POS_Y
+		LD R2,BALL_VEL_Y	;check horiztonal wall
+		ADD R1,R1,R2
+		JSR POINTADDR		;get color
+		LD R3,MAP_BGD_COL_I
+		LDR R0,R0,#0
+		ADD R0,R0,R3
+		BRz #4
+		LD R0,BALL_VEL_Y
+		NOT R0,R0
+		ADD R0,R0,#1
+		ST R0,BALL_VEL_Y
+
+		LD R0,BALL_POS_X
+		LD R1,BALL_POS_Y
+		LD R2,BALL_VEL_X
+		LD R3,BALL_VEL_Y	;apply ball vel
+		ADD R0,R0,R2
+		ADD R1,R1,R3
+		ST R0,BALL_POS_X
+		ST R1,BALL_POS_Y
+
+		LD R2,BALL_COL		;print ball
+		JSR POINT
 		
 
 		BRnzp LOOP				;loop
@@ -134,25 +178,29 @@ PLAYER_WIDTH	.FILL x000A
 PLAYER_HEIGHT	.FILL x0004
 PLAYER_MAX_X_I	.FILL xFFBA
 PLAYER_MIN_X_I	.FILL xFFFC
+PLAYER_SPEED	.FILL x0002
+PLAYER_SPEED_I	.FILL xFFFE
 
-BALL_POS_X	.FILL x0009
-BALL_POS_Y	.FILL x0009
+BALL_POS_X	.FILL x0024
+BALL_POS_Y	.FILL x0030
 BALL_VEL_X	.FILL x0001
-BALL_VEL_Y	.FILL x0001
+BALL_VEL_Y	.FILL xFFFF
 
 BGD_COL .FILL x0000
 PLAYER_COL	.FILL xFFFF
 BLOCK_COL 	.FILL xDDDD
+BALL_COL 	.FILL x07E0
 
 K_A		.FILL xFF9F				;x0061		Inverted key codes
 K_D		.FILL xFF9C				;x0064
 
-DELAY	.FILL x5000				;the delay in the program so it doesnt go so fast
+DELAY	.FILL x3000				;the delay in the program so it doesnt go so fast
 
 MAP_WIDTH	.FILL x0054
 MAP_HEIGHT	.FILL x007C
-MAP_WALL_WIDTH	.FILL x0004	
+MAP_WALL_WIDTH	.FILL x0004
 MAP_BGD_COL		.FILL x1012
+MAP_BGD_COL_I	.FILL xEFEE
 MAP_WALL_COL	.FILL xC000
 MAP_BRICK_COL	.FILL x0463
 
