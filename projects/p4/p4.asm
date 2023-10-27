@@ -11,19 +11,32 @@ START	LD R3,SCREEN_SIZEX_I	;
 
 		;set point group - top left = (R0,R1) - (width, height) = (R2,R3) - color = R4
 		AND R0,R0,#0
-		ADD R0,R0,#1
-
 		AND R1,R1,#0
-		ADD R1,R1,#1
+		LD R2,MAP_WIDTH
+		LD R3,MAP_HEIGHT		;background
+		LD R4,MAP_BGD_COL
+		JSR POINTG
 
-		LD R2,SCREEN_SIZEX
-		ADD R2,R2,#-2
+		AND R0,R0,#0
+		AND R1,R1,#0
+		LD R2,MAP_WIDTH
+		LD R3,MAP_WALL_WIDTH		;top wall
+		LD R4,MAP_WALL_COL
+		JSR POINTG
 
-		LD R3,SCREEN_SIZEY
-		ADD R3,R3,#-2
+		AND R0,R0,#0
+		AND R1,R1,#0
+		LD R2,MAP_WALL_WIDTH
+		LD R3,MAP_HEIGHT		;left wall
+		LD R4,MAP_WALL_COL
+		JSR POINTG
 
-		LD R4,BLOCK_COL
-
+		LD R0,MAP_WIDTH
+		ADD R0,R0,#-4
+		AND R1,R1,#0
+		LD R2,MAP_WALL_WIDTH
+		LD R3,MAP_HEIGHT		;right wall
+		LD R4,MAP_WALL_COL
 		JSR POINTG
 
 LOOP
@@ -57,23 +70,41 @@ DELAYL	ADD R0,R0,#-1			; a delay so that the game is slower
 		ST R2,PLAYER_VEL
 		
 ENDKEY		
-		;clear last player pos
+		;LD R0,PLAYER_POS
+		;LD R1,PLAYER_Y			;clear last player pos
+		;LD R2,BGD_COL
+		;JSR POINT
+
 		LD R0,PLAYER_POS
 		LD R1,PLAYER_Y
-		LD R2,BGD_COL
-		JSR POINT
+		LD R2,PLAYER_WIDTH
+		LD R3,PLAYER_HEIGHT		;clear player last postition
+		LD R4,MAP_BGD_COL
+		JSR POINTG
 		
 		;apply player velocity
 		LD R0,PLAYER_POS
 		LD R1,PLAYER_VEL
 		ADD R0,R0,R1
-		ST R0,PLAYER_POS
+
+		;check if new pos is valid
+		LD R1,PLAYER_MIN_X_I
+		ADD R1,R0,R1
+		BRn BADPOS
 		
-		;print new player pos
+		LD R1,PLAYER_MAX_X_I
+		ADD R1,R0,R1
+		BRp BADPOS
+
+		ST R0,PLAYER_POS
+BADPOS	
+		
 		LD R0,PLAYER_POS
 		LD R1,PLAYER_Y
-		LD R2,PLAYER_COL
-		JSR POINT
+		LD R2,PLAYER_WIDTH
+		LD R3,PLAYER_HEIGHT		;print player new postition
+		LD R4,PLAYER_COL
+		JSR POINTG
 		
 
 		BRnzp LOOP				;loop
@@ -105,9 +136,13 @@ KB_DATA .FILL xFE02				;key press data
 KB_STE  .FILL xFE00				;key press state
 DI_DATA .FILL xFE06				;print mem address
 
-PLAYER_POS	.FILL x0005
-PLAYER_Y	.FILL x0078
+PLAYER_POS	.FILL x0024
+PLAYER_Y	.FILL x0076
 PLAYER_VEL	.FILL x0000
+PLAYER_WIDTH	.FILL x000A
+PLAYER_HEIGHT	.FILL x0004
+PLAYER_MAX_X_I	.FILL xFFBA
+PLAYER_MIN_X_I	.FILL xFFFC
 
 BALL_POS_X	.FILL x0009
 BALL_POS_Y	.FILL x0009
@@ -123,9 +158,14 @@ K_D		.FILL xFF9C				;x0064
 
 DELAY	.FILL x5000				;the delay in the program so it doesnt go so fast
 
-;util functions --------------- Generally uses R0-R5
+MAP_WIDTH	.FILL x0054
+MAP_HEIGHT	.FILL x007C
+MAP_WALL_WIDTH	.FILL x0004	
+MAP_BGD_COL		.FILL x1012
+MAP_WALL_COL	.FILL xC000
+MAP_BRICK_COL	.FILL x0463
 
-DEATH	TRAP x25
+;util functions --------------- Generally uses R0-R5
 
 GETKEYW	;get key wait - in R0
 		LDI R0,KB_STE		; wait for a keystroke
@@ -156,7 +196,6 @@ POINTADDR	;get the address from a point on the screen (R0,R1)
 		
 		LD R7,SBSTORE		;load return
 		RET
-		
 
 POINT	;sets point (R0,R1) on screen to color (R2), outputs point's address (R0)
 		ST R7,R7STORE
@@ -178,7 +217,7 @@ POINTG	;set point group - top left = (R0,R1) - (width, height) = (R2,R3) - color
 		ST R4,R4STORE
 
 		ADD R0,R0,#-1		;not sure why I need to do this
-		ADD R1,R1,#-2
+		ADD R1,R1,#-2		;its to make the position correct
 
 		JSR POINTADDR 		;get address of top left
 
@@ -190,13 +229,13 @@ POINTG	;set point group - top left = (R0,R1) - (width, height) = (R2,R3) - color
 		LD R7,SCREEN_SIZEX
 		AND R6,R6,#0		;height start
 
-		ADD R1,R1,#1		;not sure why I need to do this
+		ADD R1,R1,#1		;not sure why I need to do this - makes the height right
 
 POINTGY	
 		ADD R6,R6,#-1		; increment y
 		ADD R3,R3,R7
 
-		ADD R3,R3,R5		
+		ADD R3,R3,R5		;move address back to beginning of x
 
 		AND R5,R5,#0		; reset x
 
