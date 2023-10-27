@@ -1,14 +1,5 @@
         .orig x3000
-START	LD R3,SCREEN_SIZEX_I	;
-		NOT R3,R3				;
-		ADD R3,R3,#1			;
-		ST R3,SCREEN_SIZEX_I	;
-
-		LD R3,SCREEN_SIZEY_I	;
-		NOT R3,R3				;
-		ADD R3,R3,#1			;
-		ST R3,SCREEN_SIZEY_I	;
-
+START
 		;set point group - top left = (R0,R1) - (width, height) = (R2,R3) - color = R4
 		AND R0,R0,#0
 		AND R1,R1,#0
@@ -51,7 +42,7 @@ DELAYL	ADD R0,R0,#-1			; a delay so that the game is slower
 		ST R0,PLAYER_VEL
 		BRnzp ENDKEY
 		
-		JSR GETKEYQ
+		JSR GETKEYQ				;get key quick
 
 		;R0 = pressed key, R1 = tested key, R2 = new velocity
 
@@ -116,9 +107,9 @@ BADPOS
 
 SCREEN_START .FILL xC000
 SCREEN_SIZEX .FILL x0080
-SCREEN_SIZEX_I .FILL x0080		; (gets inverted)
+SCREEN_SIZEX_I .FILL xFF80		; (gets inverted)
 SCREEN_SIZEY .FILL x007C
-SCREEN_SIZEY_I .FILL x007C		; (gets inverted)
+SCREEN_SIZEY_I .FILL xFF84		; (gets inverted)
 
 R0STORE	.FILL x0000				;
 R1STORE	.FILL x0000				;
