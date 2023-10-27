@@ -11,17 +11,19 @@ START	LD R3,SCREEN_SIZEX_I	;
 
 		;set point group - top left = (R0,R1) - (width, height) = (R2,R3) - color = R4
 		AND R0,R0,#0
-		ADD R0,R0,#5
+		ADD R0,R0,#1
 
 		AND R1,R1,#0
-		ADD R1,R1,#10
+		ADD R1,R1,#1
 
-		AND R2,R2,#0
-		ADD R2,R2,#10
+		LD R2,SCREEN_SIZEX
+		ADD R2,R2,#-2
 
-		AND R3,R3,#0
-		ADD R3,R3,#2
+		LD R3,SCREEN_SIZEY
+		ADD R3,R3,#-2
+
 		LD R4,BLOCK_COL
+
 		JSR POINTG
 
 LOOP
@@ -175,6 +177,9 @@ POINTG	;set point group - top left = (R0,R1) - (width, height) = (R2,R3) - color
 		ST R3,R3STORE		;store values for future use
 		ST R4,R4STORE
 
+		ADD R0,R0,#-1		;not sure why I need to do this
+		ADD R1,R1,#-2
+
 		JSR POINTADDR 		;get address of top left
 
 		;(width, height) = (R0,R1), color = R2, current address = R3, junk = R4, negative current offset = (R5,R6), y step = R7
@@ -182,18 +187,18 @@ POINTG	;set point group - top left = (R0,R1) - (width, height) = (R2,R3) - color
 		LD R0,R2STORE		;target width
 		LD R1,R3STORE		;target height
 		LD R2,R4STORE		;color
-		LD R4,SCREEN_SIZEX	;y increment
 		LD R7,SCREEN_SIZEX
+		AND R6,R6,#0		;height start
 
-		AND R6,R6,#0		;
+		ADD R1,R1,#1		;not sure why I need to do this
 
 POINTGY	
 		ADD R6,R6,#-1		; increment y
 		ADD R3,R3,R7
 
 		ADD R3,R3,R5		
+
 		AND R5,R5,#0		; reset x
-		ADD R5,R5,#1
 
 		ADD R4,R1,R6		;check if done
 		BRz POINTGE
