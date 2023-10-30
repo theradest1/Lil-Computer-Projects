@@ -53,7 +53,7 @@ START
 
 LOOP
 		LD R0,DELAY
-DELAYL	ADD R0,R0,#-1			; a delay so that the game is slower
+DELAYL	ADD R0,R0,#-1			; a delay so that the game isnt so fast
 		BRp DELAYL
 
 		;key press
@@ -116,11 +116,12 @@ BADPOS
 		LD R4,PLAYER_COL
 		JSR POINTG
 
+
 		;ball
-		LD R0,BALL_POS_X
+		LD R0,BALL_POS_X	;store past position
 		LD R1,BALL_POS_Y
-		LD R2,MAP_BGD_COL		;clear ball
-		JSR POINT
+		ST R0,BALL_POS_X_P
+		ST R1,BALL_POS_Y_P
 
 		LD R0,BALL_POS_X
 		LD R1,BALL_POS_Y
@@ -130,10 +131,10 @@ BADPOS
 		LD R3,MAP_BGD_COL_I
 		LDR R0,R0,#0
 		ADD R0,R0,R3
-		BRz #4
+		BRz #4				;skip next 4 lines if color is the background
 		LD R0,BALL_VEL_X
 		NOT R0,R0
-		ADD R0,R0,#1
+		ADD R0,R0,#1		;invert x velocity
 		ST R0,BALL_VEL_X
 
 		LD R0,BALL_POS_X
@@ -143,16 +144,30 @@ BADPOS
 		LD R4,SCREEN_SIZEY_I	;check if hit the ground
 		ADD R4,R1,R4		
 		BRz DEATH
+		
 		JSR POINTADDR		;get color
 		LD R3,MAP_BGD_COL_I
 		LDR R0,R0,#0
-		ADD R0,R0,R3
-		BRz #4
+		ADD R3,R3,R0
+		BRz NOCOL				;skip next _ lines if color is the background
+		
+		LD R3,PLAYER_COL_I
+		ADD R3,R3,R0
+		BRnp NOPAD				;skip next _ lines if color is not player color
+		JSR HITPADDLE
+		LD R1,BALL_VEL_X
+BREAK	ADD R0,R0,R1
+		
+		LD R1,BALL_VEL_X_MIN
+		LD R2,BALL_VEL_X_MAX
+		JSR CLAMP
+		ST R0,BALL_VEL_X	
+NOPAD
 		LD R0,BALL_VEL_Y
 		NOT R0,R0
-		ADD R0,R0,#1
+		ADD R0,R0,#1		;invert y velocity
 		ST R0,BALL_VEL_Y
-
+NOCOL
 		LD R0,BALL_POS_X
 		LD R1,BALL_POS_Y
 		LD R2,BALL_VEL_X
@@ -161,15 +176,16 @@ BADPOS
 		ADD R1,R1,R3
 		ST R0,BALL_POS_X
 		ST R1,BALL_POS_Y
-
 		LD R2,BALL_COL		;print ball
+		JSR POINT
+		
+		LD R0,BALL_POS_X_P
+		LD R1,BALL_POS_Y_P
+		LD R2,MAP_BGD_COL		;clear last ball pos
 		JSR POINT
 		
 
 		BRnzp LOOP				;loop
-
-;game functions --------------------
-
 
 ; data ----------------
 
@@ -199,23 +215,29 @@ PLAYER_POS	.FILL x0024
 PLAYER_Y	.FILL x0076
 PLAYER_VEL	.FILL x0000
 PLAYER_WIDTH	.FILL x000A
-PLAYER_HEIGHT	.FILL x0004
+PLAYER_WIDTH_H	.FILL x0005		;half of player width
+PLAYER_HEIGHT	.FILL x0002
 PLAYER_MAX_X_I	.FILL xFFBA
 PLAYER_MIN_X_I	.FILL xFFFC
 PLAYER_SPEED	.FILL x0002
 PLAYER_SPEED_I	.FILL xFFFE
 PLAYER_COL	.FILL xFFFF
+PLAYER_COL_I	.FILL x0001
 
 BALL_POS_X	.FILL x0024
 BALL_POS_Y	.FILL x0030
+BALL_POS_X_P	.FILL x0030	;past position for ball movement smoothness
+BALL_POS_Y_P	.FILL x0030
 BALL_VEL_X	.FILL x0001
 BALL_VEL_Y	.FILL xFFFF
+BALL_VEL_X_MIN	.FILL xFFFE
+BALL_VEL_X_MAX	.FILL x0002
 BALL_COL 	.FILL x07E0
 
 K_A		.FILL xFF9F				;x0061		Inverted key codes
 K_D		.FILL xFF9C				;x0064
 
-DELAY	.FILL x2000				;the delay in the program so it doesnt go so fast
+DELAY	.FILL x7000				;the delay in the program so it doesnt go so fast
 
 MAP_WIDTH	.FILL x0054
 MAP_HEIGHT	.FILL x007C
@@ -234,8 +256,36 @@ BLOCK2_X	.FILL x0020
 BLOCK3_X	.FILL x0038
 
 
-;util functions --------------- Generally uses R0-R5
-DEATH	TRAP x25
+;subroutines --------------- Generally uses R0-R5
+DEATH	TRAP x25	;just because its easier to remember
+
+HITPADDLE	;get x vel addition based on ball vs paddle positions - R0 is the added vel
+		LD R0,BALL_POS_X
+		LD R1,PLAYER_POS
+		LD R2,PLAYER_WIDTH_H
+		ADD R1,R1,R2
+		
+		;make player pos negative
+		NOT R1,R1
+		ADD R1,R1,#1
+		
+		ADD R0,R0,R1
+		RET
+
+CLAMP	;clamps R0 with a min of R1 and a max of R2 (output is R0) also uses R3 and R4
+		NOT R3,R0		;invert input number
+		ADD R3,R3,#1
+		
+		ADD R4,R1,R3
+		BRn #1			;check min
+		AND R0,R1,#-1
+		
+		ADD R4,R2,R3
+		BRp #1			;check max
+		AND R0,R2,#-1
+		
+		RET
+		
 
 GETKEYW	;get key wait - in R0
 		LDI R0,KB_STE		; wait for a keystroke
