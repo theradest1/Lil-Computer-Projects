@@ -50,7 +50,17 @@ START
 		LD R3,BLOCK_HEIGHT		;block 3
 		LD R4,BLOCK_COL
 		JSR POINTG
-
+		
+		AND R1,R1,#0
+WAIT	JSR GETKEYQ
+		ADD R1,R1,#1			;get random ball x pos from player delay at start
+		ADD R0,R0,#0
+		BRz WAIT
+		
+		LD R0,BALL_START_MASK	;limit to 5 - 68
+		AND R1,R1,R0
+		ADD R1,R1,#5
+		ST R1,BALL_POS_X
 LOOP
 		LD R0,DELAY
 DELAYL	ADD R0,R0,#-1			; a delay so that the game isnt so fast
@@ -224,12 +234,13 @@ PLAYER_SPEED_I	.FILL xFFFE
 PLAYER_COL	.FILL xFFFF
 PLAYER_COL_I	.FILL x0001
 
+BALL_START_MASK		.FILL x003F		;mask for a max of 63
 BALL_POS_X	.FILL x0024
 BALL_POS_Y	.FILL x0030
 BALL_POS_X_P	.FILL x0030	;past position for ball movement smoothness
 BALL_POS_Y_P	.FILL x0030
 BALL_VEL_X	.FILL x0001
-BALL_VEL_Y	.FILL xFFFF
+BALL_VEL_Y	.FILL x0001
 BALL_VEL_X_MIN	.FILL xFFFE
 BALL_VEL_X_MAX	.FILL x0002
 BALL_COL 	.FILL x07E0
