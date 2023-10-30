@@ -11,7 +11,7 @@ START
 		AND R0,R0,#0
 		AND R1,R1,#0
 		LD R2,MAP_WIDTH
-		LD R3,MAP_WALL_WIDTH		;top wall
+		LD R3,MAP_WALL_WIDTH	;top wall
 		LD R4,MAP_WALL_COL
 		JSR POINTG
 
@@ -68,12 +68,12 @@ DELAYL	ADD R0,R0,#-1			; a delay so that the game isnt so fast
 
 		;key press
 		LDI R0,KB_STE
-		BRnp #3				;skip key stuff and set vel to 0 if status is zero
+		BRnp #3					;skip key stuff and set vel to 0 if status is zero
 		AND R0,R0,#0
 		ST R0,PLAYER_VEL
 		BRnzp ENDKEY
 		
-		JSR GETKEYQ				;get key quick
+		JSR GETKEYQ
 
 		;R0 = pressed key, R1 = tested key, R2 = new velocity
 
@@ -109,14 +109,14 @@ ENDKEY
 
 		;check if new pos is valid
 		LD R1,PLAYER_MIN_X_I
-		ADD R1,R0,R1				;min
+		ADD R1,R0,R1			;min
 		BRn BADPOS
 		
 		LD R1,PLAYER_MAX_X_I
-		ADD R1,R0,R1				;max
+		ADD R1,R0,R1			;max
 		BRp BADPOS					
 
-		ST R0,PLAYER_POS			;store if valid
+		ST R0,PLAYER_POS		;store if valid
 BADPOS	
 		;print player new postition
 		LD R0,PLAYER_POS
@@ -128,42 +128,42 @@ BADPOS
 
 
 		;ball
-		LD R0,BALL_POS_X	;store past position
+		LD R0,BALL_POS_X		;store past position
 		LD R1,BALL_POS_Y
 		ST R0,BALL_POS_X_P
 		ST R1,BALL_POS_Y_P
 
 		LD R0,BALL_POS_X
 		LD R1,BALL_POS_Y
-		LD R2,BALL_VEL_X	;check new x vel
+		LD R2,BALL_VEL_X		;check new x vel
 		ADD R0,R0,R2
-		JSR POINTADDR		;get color
+		JSR POINTADDR			;get color
 		LD R3,MAP_BGD_COL_I
 		LDR R0,R0,#0
 		ADD R0,R0,R3
-		BRz #4				;skip next 4 lines if color is the background
+		BRz #4					;skip next 4 lines if color is the background
 		LD R0,BALL_VEL_X
 		NOT R0,R0
-		ADD R0,R0,#1		;invert x velocity
+		ADD R0,R0,#1			;invert x velocity
 		ST R0,BALL_VEL_X
 
 		LD R0,BALL_POS_X
 		LD R1,BALL_POS_Y
-		LD R2,BALL_VEL_Y	;check new y vel
+		LD R2,BALL_VEL_Y		;check new y vel
 		ADD R1,R1,R2
 		LD R4,SCREEN_SIZEY_I	;check if hit the ground
 		ADD R4,R1,R4		
 		BRz DEATH
 		
-		JSR POINTADDR		;get color
+		JSR POINTADDR			;get color
 		LD R3,MAP_BGD_COL_I
 		LDR R0,R0,#0
 		ADD R3,R3,R0
-		BRz #14				;skip next _ lines if color is the background
+		BRz #14					;skip next 14 lines if color is the background
 		
 		LD R3,PLAYER_COL_I
 		ADD R3,R3,R0
-		BRnp #7				;skip next _ lines if color is not player color
+		BRnp #7					;skip next 7 lines if color is not player color
 		JSR PADDLEDIFF
 		LD R1,BALL_VEL_X
 		ADD R0,R0,R1
@@ -175,18 +175,18 @@ BADPOS
 
 		LD R0,BALL_VEL_Y
 		NOT R0,R0
-		ADD R0,R0,#1		;invert y velocity
+		ADD R0,R0,#1			;invert y velocity
 		ST R0,BALL_VEL_Y
 		
 		LD R0,BALL_POS_X
 		LD R1,BALL_POS_Y
 		LD R2,BALL_VEL_X
-		LD R3,BALL_VEL_Y	;apply ball vel
+		LD R3,BALL_VEL_Y		;apply ball vel
 		ADD R0,R0,R2
 		ADD R1,R1,R3
 		ST R0,BALL_POS_X
 		ST R1,BALL_POS_Y
-		LD R2,BALL_COL		;print ball
+		LD R2,BALL_COL			;print ball
 		JSR POINT
 		
 		LD R0,BALL_POS_X_P
@@ -234,10 +234,10 @@ PLAYER_SPEED_I	.FILL xFFFE
 PLAYER_COL	.FILL xFFFF
 PLAYER_COL_I	.FILL x0001
 
-BALL_START_MASK		.FILL x003F		;mask for a max of 63
+BALL_START_MASK		.FILL x003F	;mask for a max of 63
 BALL_POS_X	.FILL x0024
 BALL_POS_Y	.FILL x0030
-BALL_POS_X_P	.FILL x0030	;past position for ball movement smoothness
+BALL_POS_X_P	.FILL x0030		;past position for ball movement smoothness
 BALL_POS_Y_P	.FILL x0030
 BALL_VEL_X	.FILL x0001
 BALL_VEL_Y	.FILL x0001
@@ -282,7 +282,7 @@ PADDLEDIFF	; get x difference between paddle and ball
 		ADD R1,R1,R2
 		
 		NOT R1,R1
-		ADD R1,R1,#1	;make player pos negative
+		ADD R1,R1,#1			;make player pos negative
 		
 		ADD R0,R0,R1
 		RET
@@ -297,15 +297,15 @@ CLAMP	;clamps value between min and max
 		;outputs: 
 			;value: R0
 
-		NOT R3,R0		;invert input number
+		NOT R3,R0				;invert input number
 		ADD R3,R3,#1
 		
 		ADD R4,R1,R3
-		BRn #1			;check min
+		BRn #1					;check min
 		AND R0,R1,#-1
 		
 		ADD R4,R2,R3
-		BRp #1			;check max
+		BRp #1					;check max
 		AND R0,R2,#-1
 		
 		RET
@@ -314,15 +314,15 @@ CLAMP	;clamps value between min and max
 GETKEYW	;get key (waits)
 		;outputs: 
 			;key: R0
-		LDI R0,KB_STE		; wait for a keystroke
+		LDI R0,KB_STE			; wait for a keystroke
 		BRzp GETKEYW
-		LDI R0,KB_DATA		; read it and return
+		LDI R0,KB_DATA			; read it and return
 		RET
 
 GETKEYQ	;get last key
 		;outputs: 
 			;key: R0
-		LDI R0,KB_DATA		; read it and return
+		LDI R0,KB_DATA			; read it and return
 		RET
 
 PRINT	; prints to the console
@@ -343,19 +343,19 @@ POINTADDR	;get the address of a point
 		;outputs: 
 			;address: R0
 			
-		ST R0,R0STORE		; save x value
-		ST R7,SBSTORE		; save return
+		ST R0,R0STORE			; save x value
+		ST R7,SBSTORE			; save return
 
-		LD R2,SCREEN_SIZEX	; R1 is already Y value
+		LD R2,SCREEN_SIZEX		; R1 is already Y value
 		JSR MULT
 		
-		AND R1,R0,#-1		; move address to R1
-		LD R0,R0STORE		; add x (R0)
-		ADD R0,R0,R1		;
-		LD R1,SCREEN_START	;add the screen start address
-		ADD R0,R0,R1		;
+		AND R1,R0,#-1			; move address to R1
+		LD R0,R0STORE			; add x (R0)
+		ADD R0,R0,R1			;
+		LD R1,SCREEN_START		;add the screen start address
+		ADD R0,R0,R1			;
 		
-		LD R7,SBSTORE		;load return
+		LD R7,SBSTORE			;load return
 		RET
 
 POINT	;sets single point to color
@@ -373,10 +373,10 @@ POINT	;sets single point to color
 		ST R7,R7STORE
 		ST R2,R2STORE
 		
-		JSR POINTADDR 		;get address
+		JSR POINTADDR 			;get address
 		
 		LD R2,R2STORE
-		STR R2,R0,#0		; set color (R2) at mem[R0]
+		STR R2,R0,#0			; set color (R2) at mem[R0]
 		
 		LD R7,R7STORE
 		RET
@@ -394,42 +394,42 @@ POINTG	;sets point group to color
 		ST R7,R7STORE
 		
 		ST R2,R2STORE
-		ST R3,R3STORE		;store values for future use
+		ST R3,R3STORE			;store values for future use
 		ST R4,R4STORE
 
-		ADD R0,R0,#-1		;not sure why I need to do this
-		ADD R1,R1,#-2		;its to make the position correct
+		ADD R0,R0,#-1			;not sure why I need to do this
+		ADD R1,R1,#-2			;its to make the position correct
 
-		JSR POINTADDR 		;get address of top left
+		JSR POINTADDR 			;get address of top left
 
 		;(width, height) = (R0,R1), color = R2, current address = R3, junk = R4, negative current offset = (R5,R6), y step = R7
-		ADD R3,R0,#0		;address
-		LD R0,R2STORE		;target width
-		LD R1,R3STORE		;target height
-		LD R2,R4STORE		;color
+		ADD R3,R0,#0			;address
+		LD R0,R2STORE			;target width
+		LD R1,R3STORE			;target height
+		LD R2,R4STORE			;color
 		LD R7,SCREEN_SIZEX
-		AND R6,R6,#0		;height start
+		AND R6,R6,#0			;height start
 
-		ADD R1,R1,#1		;not sure why I need to do this - makes the height right
+		ADD R1,R1,#1			;not sure why I need to do this - makes the height right
 
 POINTGY	
-		ADD R6,R6,#-1		; increment y
+		ADD R6,R6,#-1			; increment y
 		ADD R3,R3,R7
 
-		ADD R3,R3,R5		;move address back to beginning of x
+		ADD R3,R3,R5			;move address back to beginning of x
 
-		AND R5,R5,#0		; reset x
+		AND R5,R5,#0			; reset x
 
-		ADD R4,R1,R6		;check if done
+		ADD R4,R1,R6			;check if done
 		BRz POINTGE
 POINTGX
-		ADD R5,R5,#-1		; increment x
+		ADD R5,R5,#-1			; increment x
 		ADD R3,R3,#1
 
-		STR R2,R3,#0		; set color (R2) at address (R3)
+		STR R2,R3,#0			; set color (R2) at address (R3)
 
 		ADD R4,R0,R5
-		BRz POINTGY			; check if x is done
+		BRz POINTGY				; check if x is done
 		BRnzp POINTGX
 POINTGE
 		LD R7,R7STORE
@@ -445,22 +445,22 @@ MULT	;multiplication
 		;outputs: 
 			;R0
 			
-		AND R0,R0,#0	; result
-		ADD R3,R0,#1	; bit test mask
-		ADD R4,R0,#-1	; end condition mask	
+		AND R0,R0,#0			; result
+		ADD R3,R0,#1			; bit test mask
+		ADD R4,R0,#-1			; end condition mask	
 
-MULT1	AND R2,R2,R4	; any bits left
-		BRz MULT3		;
-		AND R5,R2,R3	; test bit
-		BRz MULT2		;
-		ADD R0,R0,R1	; add mult to result
+MULT1	AND R2,R2,R4			; any bits left
+		BRz MULT3				;
+		AND R5,R2,R3			; test bit
+		BRz MULT2				;
+		ADD R0,R0,R1			; add mult to result
 
-MULT2	ADD R1,R1,R1	; shift mult bits
-		ADD R3,R3,R3	;
-		ADD R4,R4,R4	;
-		BRnzp MULT1		; keep going
+MULT2	ADD R1,R1,R1			; shift mult bits
+		ADD R3,R3,R3			;
+		ADD R4,R4,R4			;
+		BRnzp MULT1				; keep going
 
-MULT3	RET				; finished
+MULT3	RET						; finished
 
 
-		.end				; KEEP AT THE END - errors from me being dumb and forgetting so far = 3
+		.end					; KEEP AT THE END - errors from me being dumb and forgetting so far = 3
