@@ -149,25 +149,25 @@ BADPOS
 		LD R3,MAP_BGD_COL_I
 		LDR R0,R0,#0
 		ADD R3,R3,R0
-		BRz NOCOL				;skip next _ lines if color is the background
+		BRz #14				;skip next _ lines if color is the background
 		
 		LD R3,PLAYER_COL_I
 		ADD R3,R3,R0
-		BRnp NOPAD				;skip next _ lines if color is not player color
+		BRnp #7				;skip next _ lines if color is not player color
 		JSR HITPADDLE
 		LD R1,BALL_VEL_X
-BREAK	ADD R0,R0,R1
+		ADD R0,R0,R1
 		
 		LD R1,BALL_VEL_X_MIN
 		LD R2,BALL_VEL_X_MAX
 		JSR CLAMP
 		ST R0,BALL_VEL_X	
-NOPAD
+
 		LD R0,BALL_VEL_Y
 		NOT R0,R0
 		ADD R0,R0,#1		;invert y velocity
 		ST R0,BALL_VEL_Y
-NOCOL
+		
 		LD R0,BALL_POS_X
 		LD R1,BALL_POS_Y
 		LD R2,BALL_VEL_X
@@ -237,7 +237,7 @@ BALL_COL 	.FILL x07E0
 K_A		.FILL xFF9F				;x0061		Inverted key codes
 K_D		.FILL xFF9C				;x0064
 
-DELAY	.FILL x7000				;the delay in the program so it doesnt go so fast
+DELAY	.FILL x3500				;the delay in the program so it doesnt go so fast
 
 MAP_WIDTH	.FILL x0054
 MAP_HEIGHT	.FILL x007C
