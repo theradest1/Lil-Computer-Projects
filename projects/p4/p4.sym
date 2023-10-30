@@ -2,7 +2,6 @@
 // Scope level 0:
 //	Symbol Name       Page Address
 //	----------------  ------------
-//	HITPADDLE         30C9
 //	POINTG            30F4
 //	R5STORE           309B
 //	DI_DATA           30A2
@@ -76,6 +75,7 @@
 //	DEATH             30C8
 //	SCREEN_SIZEX      3092
 //	BALL_POS_X_P      30B1
+//	PADDLEDIFF        30C9
 //	PLAYER_MAX_X_I    30A9
 //	PLAYER_WIDTH      30A6
 

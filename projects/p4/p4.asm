@@ -154,7 +154,7 @@ BADPOS
 		LD R3,PLAYER_COL_I
 		ADD R3,R3,R0
 		BRnp #7				;skip next _ lines if color is not player color
-		JSR HITPADDLE
+		JSR PADDLEDIFF
 		LD R1,BALL_VEL_X
 		ADD R0,R0,R1
 		
@@ -259,20 +259,33 @@ BLOCK3_X	.FILL x0038
 ;subroutines --------------- Generally uses R0-R5
 DEATH	TRAP x25	;just because its easier to remember
 
-HITPADDLE	;get x vel addition based on ball vs paddle positions - R0 is the added vel
+PADDLEDIFF	; get x difference between paddle and ball
+		;overwrites: 
+			;R0-R2
+		;outputs: 
+			;x difference: R0
+			
 		LD R0,BALL_POS_X
-		LD R1,PLAYER_POS
+		LD R1,PLAYER_POS		;load values
 		LD R2,PLAYER_WIDTH_H
 		ADD R1,R1,R2
 		
-		;make player pos negative
 		NOT R1,R1
-		ADD R1,R1,#1
+		ADD R1,R1,#1	;make player pos negative
 		
 		ADD R0,R0,R1
 		RET
 
-CLAMP	;clamps R0 with a min of R1 and a max of R2 (output is R0) also uses R3 and R4
+CLAMP	;clamps value between min and max
+		;inputs: 
+			;value: R0
+			;min: R1
+			;max: R2
+		;overwrites: 
+			;R0-R4
+		;outputs: 
+			;value: R0
+
 		NOT R3,R0		;invert input number
 		ADD R3,R3,#1
 		
@@ -287,21 +300,38 @@ CLAMP	;clamps R0 with a min of R1 and a max of R2 (output is R0) also uses R3 an
 		RET
 		
 
-GETKEYW	;get key wait - in R0
+GETKEYW	;get key (waits)
+		;outputs: 
+			;key: R0
 		LDI R0,KB_STE		; wait for a keystroke
 		BRzp GETKEYW
 		LDI R0,KB_DATA		; read it and return
 		RET
 
-GETKEYQ	;get key quick - in R0
+GETKEYQ	;get last key
+		;outputs: 
+			;key: R0
 		LDI R0,KB_DATA		; read it and return
 		RET
 
-PRINT	; prints R0 to the console
+PRINT	; prints to the console
+		;inputs: 
+			;token: R0 (ASCII)
+			
 		STI R0,DI_DATA
 		RET
 
-POINTADDR	;get the address from a point on the screen (R0,R1)
+POINTADDR	;get the address of a point
+		;inputs: 
+			;position: (R0,R1)
+		;overwrites: 
+			;R0-R1
+			;R7
+			;SBS
+			;R0S
+		;outputs: 
+			;address: R0
+			
 		ST R0,R0STORE		; save x value
 		ST R7,SBSTORE		; save return
 
@@ -317,7 +347,18 @@ POINTADDR	;get the address from a point on the screen (R0,R1)
 		LD R7,SBSTORE		;load return
 		RET
 
-POINT	;sets point (R0,R1) on screen to color (R2), outputs point's address (R0)
+POINT	;sets single point to color
+		;inputs: 
+			;position: (R0,R1)
+			;color: R2
+		;overwrites: 
+			;R0-R2
+			;R7
+			;R7S
+			;R2S
+			;R0S
+			;SBS
+		
 		ST R7,R7STORE
 		ST R2,R2STORE
 		
@@ -329,7 +370,16 @@ POINT	;sets point (R0,R1) on screen to color (R2), outputs point's address (R0)
 		LD R7,R7STORE
 		RET
 
-POINTG	;set point group - top left = (R0,R1) - (width, height) = (R2,R3) - color = R4
+POINTG	;sets point group to color
+		;inputs: 
+			;start pos: (R0,R1)
+			;dimentions: (R2,R3)
+			;color: R4
+		;overwrites: 
+			;R0-R7
+			;R2S-R4S
+			;R7S
+		
 		ST R7,R7STORE
 		
 		ST R2,R2STORE
@@ -375,7 +425,15 @@ POINTGE
 		RET
 		
 
-MULT	;multiplication - input R1, R2, output R0
+MULT	;multiplication
+		;inputs: 
+			;R1
+			;R2
+		;overwrites: 
+			;R0-R5
+		;outputs: 
+			;R0
+			
 		AND R0,R0,#0	; result
 		ADD R3,R0,#1	; bit test mask
 		ADD R4,R0,#-1	; end condition mask	
