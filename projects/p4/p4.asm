@@ -1,62 +1,14 @@
         .orig x3000
 START
 		;set point group - top left = (R0,R1) - (width, height) = (R2,R3) - color = R4
-		AND R0,R0,#0
-		AND R1,R1,#0
-		LD R2,MAP_WIDTH
-		LD R3,MAP_HEIGHT		;background
-		LD R4,MAP_BGD_COL
-		JSR POINTG
+    JSR DRAWMAP
 
-		AND R0,R0,#0
-		AND R1,R1,#0
-		LD R2,MAP_WIDTH
-		LD R3,MAP_WALL_WIDTH	;top wall
-		LD R4,MAP_WALL_COL
-		JSR POINTG
-
-		AND R0,R0,#0
-		AND R1,R1,#0
-		LD R2,MAP_WALL_WIDTH
-		LD R3,MAP_HEIGHT		;left wall
-		LD R4,MAP_WALL_COL
-		JSR POINTG
-
-		LD R0,MAP_WIDTH
-		ADD R0,R0,#-4
-		AND R1,R1,#0
-		LD R2,MAP_WALL_WIDTH
-		LD R3,MAP_HEIGHT		;right wall
-		LD R4,MAP_WALL_COL
-		JSR POINTG
-
-		LD R0,BLOCK1_X
-		LD R1,BLOCK_Y
-		LD R2,BLOCK_WIDTH
-		LD R3,BLOCK_HEIGHT		;block 1
-		LD R4,BLOCK_COL
-		JSR POINTG
-
-		LD R0,BLOCK2_X
-		LD R1,BLOCK_Y
-		LD R2,BLOCK_WIDTH
-		LD R3,BLOCK_HEIGHT		;block 2
-		LD R4,BLOCK_COL
-		JSR POINTG
-
-		LD R0,BLOCK3_X
-		LD R1,BLOCK_Y
-		LD R2,BLOCK_WIDTH
-		LD R3,BLOCK_HEIGHT		;block 3
-		LD R4,BLOCK_COL
-		JSR POINTG
-		
 		AND R1,R1,#0
 WAIT	JSR GETKEYQ
 		ADD R1,R1,#1			;get random ball x pos from player delay at start
 		ADD R0,R0,#0
 		BRz WAIT
-		
+
 		LD R0,BALL_START_MASK	;limit to 5 - 68
 		AND R1,R1,R0
 		ADD R1,R1,#5
@@ -72,7 +24,7 @@ DELAYL	ADD R0,R0,#-1			; a delay so that the game isnt so fast
 		AND R0,R0,#0
 		ST R0,PLAYER_VEL
 		BRnzp ENDKEY
-		
+
 		JSR GETKEYQ
 
 		;R0 = pressed key, R1 = tested key, R2 = new velocity
@@ -92,7 +44,7 @@ DELAYL	ADD R0,R0,#-1			; a delay so that the game isnt so fast
 		BRnp #2
 		ADD R2,R2,R3
 		ST R2,PLAYER_VEL
-		
+
 ENDKEY
 		;player
 		LD R0,PLAYER_POS
@@ -101,7 +53,7 @@ ENDKEY
 		LD R3,PLAYER_HEIGHT		;clear player last postition
 		LD R4,MAP_BGD_COL
 		JSR POINTG
-		
+
 		;apply player velocity
 		LD R0,PLAYER_POS
 		LD R1,PLAYER_VEL
@@ -111,18 +63,18 @@ ENDKEY
 		LD R1,PLAYER_MIN_X_I
 		ADD R1,R0,R1			;min
 		BRn BADPOS
-		
+
 		LD R1,PLAYER_MAX_X_I
 		ADD R1,R0,R1			;max
-		BRp BADPOS					
+		BRp BADPOS
 
 		ST R0,PLAYER_POS		;store if valid
-BADPOS	
+BADPOS
 		;print player new postition
 		LD R0,PLAYER_POS
 		LD R1,PLAYER_Y
 		LD R2,PLAYER_WIDTH
-		LD R3,PLAYER_HEIGHT		
+		LD R3,PLAYER_HEIGHT
 		LD R4,PLAYER_COL
 		JSR POINTG
 
@@ -152,32 +104,32 @@ BADPOS
 		LD R2,BALL_VEL_Y		;check new y vel
 		ADD R1,R1,R2
 		LD R4,SCREEN_SIZEY_I	;check if hit the ground
-		ADD R4,R1,R4		
+		ADD R4,R1,R4
 		BRz DEATH
-		
+
 		JSR POINTADDR			;get color
 		LD R3,MAP_BGD_COL_I
 		LDR R0,R0,#0
 		ADD R3,R3,R0
 		BRz #14					;skip next 14 lines if color is the background
-		
+
 		LD R3,PLAYER_COL_I
 		ADD R3,R3,R0
 		BRnp #7					;skip next 7 lines if color is not player color
 		JSR PADDLEDIFF
 		LD R1,BALL_VEL_X
 		ADD R0,R0,R1
-		
+
 		LD R1,BALL_VEL_X_MIN
 		LD R2,BALL_VEL_X_MAX
 		JSR CLAMP
-		ST R0,BALL_VEL_X	
+		ST R0,BALL_VEL_X
 
 		LD R0,BALL_VEL_Y
 		NOT R0,R0
 		ADD R0,R0,#1			;invert y velocity
 		ST R0,BALL_VEL_Y
-		
+
 		LD R0,BALL_POS_X
 		LD R1,BALL_POS_Y
 		LD R2,BALL_VEL_X
@@ -188,14 +140,105 @@ BADPOS
 		ST R1,BALL_POS_Y
 		LD R2,BALL_COL			;print ball
 		JSR POINT
-		
+
 		LD R0,BALL_POS_X_P
 		LD R1,BALL_POS_Y_P
 		LD R2,MAP_BGD_COL		;clear last ball pos
 		JSR POINT
-		
+
 
 		BRnzp LOOP				;loop
+
+; subroutines ------------------
+
+PADDLEDIFF	; get x difference between paddle and ball
+		;overwrites:
+			;R0-R2
+		;outputs:
+			;x difference: R0
+
+		LD R0,BALL_POS_X
+		LD R1,PLAYER_POS		;load values
+		LD R2,PLAYER_WIDTH_H
+		ADD R1,R1,R2
+
+		NOT R1,R1
+		ADD R1,R1,#1			;make player pos negative
+
+		ADD R0,R0,R1
+		RET
+
+DRAWMAP  ;no inputs, no outputs
+    ST R7,RE2STORE
+
+    AND R0,R0,#0
+    AND R1,R1,#0
+    LD R2,MAP_WIDTH
+    LD R3,MAP_HEIGHT		;background
+    LD R4,MAP_BGD_COL
+    JSR POINTG
+
+    AND R0,R0,#0
+    AND R1,R1,#0
+    LD R2,MAP_WIDTH
+    LD R3,MAP_WALL_WIDTH	;top wall
+    LD R4,MAP_WALL_COL
+    JSR POINTG
+
+    AND R0,R0,#0
+    AND R1,R1,#0
+    LD R2,MAP_WALL_WIDTH
+    LD R3,MAP_HEIGHT		;left wall
+    LD R4,MAP_WALL_COL
+    JSR POINTG
+
+    LD R0,MAP_WIDTH
+    ADD R0,R0,#-4
+    AND R1,R1,#0
+    LD R2,MAP_WALL_WIDTH
+    LD R3,MAP_HEIGHT		;right wall
+    LD R4,MAP_WALL_COL
+    JSR POINTG
+
+    ;blocks
+    LD R0,BLOCK_START_Y
+    ADD R0,R0,#-4
+    ST R0,RE3STORE  ;y count variable
+BLOCKLOOPY
+    LD R0,RE3STORE  ;step y
+    LD R2,BLOCK_HEIGHT
+    ADD R0,R0,R2
+    ADD R0,R0,#1
+    ST R0,RE3STORE
+
+    LD R0,BLOCK_START_X
+    ADD R0,R0,#-8
+    ST R0,RE1STORE  ;x count variable
+BLOCKLOOPX
+    LD R0,RE1STORE
+    LD R2,BLOCK_WIDTH ;load
+
+    ADD R0,R0,R2  ;step x
+    ADD R0,R0,#1
+    ST R0,RE1STORE
+
+		LD R3,BLOCK_HEIGHT		;print
+    LD R1,RE3STORE
+		LD R4,BLOCK_COL
+		JSR POINTG
+
+    LD R0,RE1STORE
+    LD R1,BLOCK_END_X_I
+    ADD R0,R0,R1
+    BRn BLOCKLOOPX
+
+    LD R0,RE3STORE
+    LD R1,BLOCK_END_Y_I
+    ADD R0,R0,R1
+    BRn BLOCKLOOPY
+
+    LD R7,RE2STORE
+    RET
 
 ; data ----------------
 
@@ -214,6 +257,10 @@ R5STORE	.FILL x0000				;
 R6STORE	.FILL x0000				;
 R7STORE	.FILL x0000				;
 
+RE1STORE	.FILL x0000			;
+RE2STORE	.FILL x0000			; a few extra register storages
+RE3STORE	.FILL x0000			;
+
 SBSTORE .FILL x0000				; store R7 here when nesting subroutines (for subroutines like print point)
 UTSTORE	.FILL x0000				; store R7 here when nesting subroutines (for utilities like multiply)
 
@@ -227,7 +274,7 @@ PLAYER_VEL	.FILL x0000
 PLAYER_WIDTH	.FILL x000A
 PLAYER_WIDTH_H	.FILL x0005		;half of player width
 PLAYER_HEIGHT	.FILL x0002
-PLAYER_MAX_X_I	.FILL xFFBA
+PLAYER_MAX_X_I	.FILL xFFB3
 PLAYER_MIN_X_I	.FILL xFFFC
 PLAYER_SPEED	.FILL x0002
 PLAYER_SPEED_I	.FILL xFFFE
@@ -250,7 +297,7 @@ K_D		.FILL xFF9C				;x0064
 
 DELAY	.FILL x3500				;the delay in the program so it doesnt go so fast
 
-MAP_WIDTH	.FILL x0054
+MAP_WIDTH	.FILL x005A
 MAP_HEIGHT	.FILL x007C
 MAP_WALL_WIDTH	.FILL x0004
 MAP_BGD_COL		.FILL x1012
@@ -259,60 +306,43 @@ MAP_WALL_COL	.FILL xC000
 
 BLOCK_COL	.FILL x07E0
 BLOCK_HEIGHT	.FILL x0004
-BLOCK_WIDTH		.FILL x0014
+BLOCK_WIDTH		.FILL x0008
 BLOCK_Y		.FILL x0008
-
-BLOCK1_X	.FILL x0008
-BLOCK2_X	.FILL x0020
-BLOCK3_X	.FILL x0038
+BLOCK_START_X .FILL x0004   ;is negative because there is an initial step in loop (makes things more simple to do this)
+BLOCK_END_X_I .FILL xFFBA
+BLOCK_START_Y .FILL x0008
+BLOCK_END_Y_I .FILL xFFE5
 
 
 ;subroutines --------------- Generally uses R0-R5
 DEATH	TRAP x25	;just because its easier to remember
 
-PADDLEDIFF	; get x difference between paddle and ball
-		;overwrites: 
-			;R0-R2
-		;outputs: 
-			;x difference: R0
-			
-		LD R0,BALL_POS_X
-		LD R1,PLAYER_POS		;load values
-		LD R2,PLAYER_WIDTH_H
-		ADD R1,R1,R2
-		
-		NOT R1,R1
-		ADD R1,R1,#1			;make player pos negative
-		
-		ADD R0,R0,R1
-		RET
-
 CLAMP	;clamps value between min and max
-		;inputs: 
+		;inputs:
 			;value: R0
 			;min: R1
 			;max: R2
-		;overwrites: 
+		;overwrites:
 			;R0-R4
-		;outputs: 
+		;outputs:
 			;value: R0
 
 		NOT R3,R0				;invert input number
 		ADD R3,R3,#1
-		
+
 		ADD R4,R1,R3
 		BRn #1					;check min
 		AND R0,R1,#-1
-		
+
 		ADD R4,R2,R3
 		BRp #1					;check max
 		AND R0,R2,#-1
-		
+
 		RET
-		
+
 
 GETKEYW	;get key (waits)
-		;outputs: 
+		;outputs:
 			;key: R0
 		LDI R0,KB_STE			; wait for a keystroke
 		BRzp GETKEYW
@@ -320,79 +350,79 @@ GETKEYW	;get key (waits)
 		RET
 
 GETKEYQ	;get last key
-		;outputs: 
+		;outputs:
 			;key: R0
 		LDI R0,KB_DATA			; read it and return
 		RET
 
 PRINT	; prints to the console
-		;inputs: 
+		;inputs:
 			;token: R0 (ASCII)
-			
+
 		STI R0,DI_DATA
 		RET
 
 POINTADDR	;get the address of a point
-		;inputs: 
+		;inputs:
 			;position: (R0,R1)
-		;overwrites: 
+		;overwrites:
 			;R0-R1
 			;R7
 			;SBS
 			;R0S
-		;outputs: 
+		;outputs:
 			;address: R0
-			
+
 		ST R0,R0STORE			; save x value
 		ST R7,SBSTORE			; save return
 
 		LD R2,SCREEN_SIZEX		; R1 is already Y value
 		JSR MULT
-		
+
 		AND R1,R0,#-1			; move address to R1
 		LD R0,R0STORE			; add x (R0)
 		ADD R0,R0,R1			;
 		LD R1,SCREEN_START		;add the screen start address
 		ADD R0,R0,R1			;
-		
+
 		LD R7,SBSTORE			;load return
 		RET
 
 POINT	;sets single point to color
-		;inputs: 
+		;inputs:
 			;position: (R0,R1)
 			;color: R2
-		;overwrites: 
+		;overwrites:
 			;R0-R2
 			;R7
 			;R7S
 			;R2S
 			;R0S
 			;SBS
-		
+
 		ST R7,R7STORE
 		ST R2,R2STORE
-		
+
 		JSR POINTADDR 			;get address
-		
+
 		LD R2,R2STORE
 		STR R2,R0,#0			; set color (R2) at mem[R0]
-		
+
 		LD R7,R7STORE
 		RET
 
 POINTG	;sets point group to color
-		;inputs: 
+		;inputs:
 			;start pos: (R0,R1)
 			;dimentions: (R2,R3)
 			;color: R4
-		;overwrites: 
+		;overwrites:
 			;R0-R7
 			;R2S-R4S
 			;R7S
-		
+
 		ST R7,R7STORE
-		
+
 		ST R2,R2STORE
 		ST R3,R3STORE			;store values for future use
 		ST R4,R4STORE
@@ -412,7 +442,7 @@ POINTG	;sets point group to color
 
 		ADD R1,R1,#1			;not sure why I need to do this - makes the height right
 
-POINTGY	
+POINTGY
 		ADD R6,R6,#-1			; increment y
 		ADD R3,R3,R7
 
@@ -434,20 +464,20 @@ POINTGX
 POINTGE
 		LD R7,R7STORE
 		RET
-		
+
 
 MULT	;multiplication
-		;inputs: 
+		;inputs:
 			;R1
 			;R2
-		;overwrites: 
+		;overwrites:
 			;R0-R5
-		;outputs: 
+		;outputs:
 			;R0
-			
+
 		AND R0,R0,#0			; result
 		ADD R3,R0,#1			; bit test mask
-		ADD R4,R0,#-1			; end condition mask	
+		ADD R4,R0,#-1			; end condition mask
 
 MULT1	AND R2,R2,R4			; any bits left
 		BRz MULT3				;
