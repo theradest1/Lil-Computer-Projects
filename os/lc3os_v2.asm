@@ -1,4 +1,4 @@
-        .ORIG x0000
+.ORIG x0000
 
 ; the TRAP vector table
 	.FILL BAD_TRAP	; x00
@@ -65,10 +65,10 @@
 	.FILL BAD_TRAP	; x3D
 	.FILL BAD_TRAP	; x3E
 	.FILL BAD_TRAP	; x3F
-	.FILL BAD_TRAP  ; x40
-	.FILL BAD_TRAP  ; x41
-	.FILL BAD_TRAP	; x42
-	.FILL BAD_TRAP	; x43
+      .FILL DRAW_BLOCK 	; x40
+      .FILL GET_BLOCK_COLOR 	; x41
+      .FILL GET_EVENT 	; x42
+      .FILL RANDOM_NUMBER     ; x43
 	.FILL BAD_TRAP	; x44
 	.FILL BAD_TRAP	; x45
 	.FILL BAD_TRAP	; x46
@@ -536,8 +536,8 @@ OS_KBSR	.FILL xFE00		; keyboard status register
 OS_KBDR	.FILL xFE02		; keyboard data register
 OS_DSR	.FILL xFE04		; display status register
 OS_DDR	.FILL xFE06		; display data register
-OS_TR	.FILL xFE08		; timer register
-OS_TMI  .FILL xFE0A             ; timer interval register
+OS_TR		.FILL xFE08		; timer register
+OS_TMI  	.FILL xFE0A       ; timer interval register
 OS_MPR	.FILL xFE12		; memory protection register
 OS_MCR	.FILL xFFFE		; machine control register
 
@@ -686,3 +686,272 @@ BAD_TRAP
 BAD_INT		RTI
 
 TRAP_IN_MSG	.STRINGZ "\nInput a character> "
+
+;;; ***************************************************************************
+        
+;;; DRAW_BLOCK - your code for drawing blocks
+;;; Input
+;;;   r0 - column in field (x)
+;;;   r1 - row in field (y)
+;;;   r2 - color
+;;; Output
+;;;   video memory will be updated to place block of approriate color
+
+;  Register Saves
+DB_R0: .FILL x0
+DB_R1: .FILL x0
+DB_R2: .FILL x0
+DB_R3: .FILL x0
+DB_R4: .FILL x0
+DB_R5: .FILL x0
+DB_R6: .FILL x0
+DB_R7: .FILL x0        
+                
+DRAW_BLOCK:     
+        ; Register Saving
+        ST R0,DB_R0
+        ST R1,DB_R1
+        ST R2,DB_R2
+        ST R3,DB_R3
+        ST R4,DB_R4
+        ST R5,DB_R5
+        ST R6,DB_R6
+        ST R7,DB_R7
+        
+        ; *** INSERT CODE FOR PART 1 HERE ***
+        ;; ~25 lines of code or so
+
+        MUL R3, R0, #4
+        MUL R4, R1, #4
+	  
+	  LD R0, VIDEO_MEM_BEGIN
+        LD R1, VIDEO_ROW_SIZE
+        AND R5, R5, #0
+LOOP_FOUR:
+	  ADD R6, R4, R5
+        MUL R6, R6, R1
+        ADD R6, R6, R3
+        ADD R6, R6, R0 
+        STR R2, R6, #0
+	  STR R2, R6, #1
+        STR R2, R6, #2  
+        STR R2, R6, #3  
+        ADD R5, R5, #1
+        ADD R6, R5, #-4
+        BRn LOOP_FOUR
+
+        ; Register Restoring
+        LD R0,DB_R0
+        LD R1,DB_R1
+        LD R2,DB_R2
+        LD R3,DB_R3
+        LD R4,DB_R4
+        LD R5,DB_R5
+        LD R6,DB_R6
+        LD R7,DB_R7
+        
+        RTT
+
+;  Video Memory Constants
+
+VIDEO_MEM_BEGIN:  .FILL xC000
+VIDEO_ROW_SIZE:   .FILL #128
+
+; You may want to add some variables here
+        
+TEMP: .FILL x0000
+
+;;; ***************************************************************************
+        
+;;; GET_BLOCK_COLOR - your code for getting a block's color
+;;; Input
+;;;   r0 - column in game field (x)
+;;;   r1 - row in game field (y)
+;;; Output
+;;;   r5 - color of block at the position specified by r0 and r1
+        
+;  Register Saves
+GBC_R0: .FILL x0
+GBC_R1: .FILL x0
+GBC_R2: .FILL x0
+GBC_R3: .FILL x0
+GBC_R4: .FILL x0
+;no r5
+GBC_R6: .FILL x0
+GBC_R7: .FILL x0        
+
+GET_BLOCK_COLOR:        
+        ; Register Saving
+        ST R0,GBC_R0
+        ST R1,GBC_R1
+        ST R2,GBC_R2
+        ST R3,GBC_R3
+        ST R4,GBC_R4
+        ;; don't save R5 because it holds the return value
+        ST R6,GBC_R6
+        ST R7,GBC_R7
+                
+        ; *** INSERT CODE FOR PART 2 HERE ***
+        ;; ~10 lines of code or so
+        MUL R3, R0, #4
+        MUL R4, R1, #4
+        LD R0, VIDEO_ROW_SIZE
+        MUL R5, R4, R0
+        ADD R5, R5, R3
+        LD R7, VIDEO_MEM_BEGIN
+        ADD R5, R5, R7
+        LDR R5, R5, #0
+
+        ; Register Restoring
+        LD R0,GBC_R0
+        LD R1,GBC_R1
+        LD R2,GBC_R2
+        LD R3,GBC_R3
+        LD R4,GBC_R4
+        ;; don't restore R5 because it holds the return value
+        LD R6,GBC_R6
+        LD R7,GBC_R7
+        
+        RTT
+
+; You may want to add some variables here
+
+        
+;;; ***************************************************************************
+
+;;; RANDOM_NUMBER
+;;; Register Input
+;;;   None
+;;; Register Output
+;;;   r5:        pseudo-random number
+
+RN_R0:   .FILL x0
+RN_R1:   .FILL x0
+RN_R2:   .FILL x0
+RN_R3:   .FILL x0
+RN_R4:   .FILL x0
+;no r5
+RN_R6:   .FILL x0
+RN_R7:   .FILL x0
+
+RANDOM_NUMBER:  
+        ; Register Saving
+        ST R0, RN_R0
+        ST R1, RN_R1
+        ST R2, RN_R2
+        ST R3, RN_R3
+        ST R4, RN_R4
+        ;; don't save R5 because it holds the return value
+        ST R6, RN_R6
+        ST R7, RN_R7
+        
+        ; *** INSERT CODE FOR PART 3 HERE ***
+        ;; ~15 lines of code or so
+        LD R0, R_POS
+        LD R1, R_SIZE
+        ADD R0, R0, #1
+        SUB R2, R0, R1
+        BRn SKIP
+        AND R0, R0, #0
+SKIP:
+	  ST R0, R_POS
+        LEA R1, R_START
+	  ADD R1, R1, R0
+        LDR R5, R1, #0
+
+        ; Register Restoring
+        LD R0, RN_R0
+        LD R1, RN_R1
+        LD R2, RN_R2
+        LD R3, RN_R3
+        LD R4, RN_R4
+        ;; don't restore R5 because it holds the return value
+        LD R6, RN_R6
+        LD R7, RN_R7
+
+        RTT
+
+; RANDOM_NUMBER local variables
+
+R_POS:   .FILL 0                ; initially zero
+R_SIZE:  .FILL x19
+R_START: .FILL x35FE            ; Array of "random" numbers
+         .FILL x342D
+         .FILL x26D3
+         .FILL xDE45
+         .FILL xF56E
+         .FILL xBFD4
+         .FILL xDE31
+         .FILL x25DE
+         .FILL xFF45
+         .FILL x34ED
+         .FILL x12E9
+         .FILL x82AB
+         .FILL x08E4
+         .FILL x5400
+         .FILL xED25
+         .FILL x346E
+         .FILL x2300
+         .FILL x3644
+         .FILL x1AE4
+         .FILL x85D4
+         .FILL xED48
+         .FILL x347D
+         .FILL x1234
+         .FILL x4842
+         .FILL xADEF
+
+;;; ***************************************************************************
+
+;;; GET_EVENT - your code for getting a keyboard or timer event
+;;; Input
+;;;   none
+;;; Output
+;;;   r5 - an integer indicating what event has happened
+;;;        0 (timer), -1 (quit), 1 (left), 2 (up), 3 (right), 4 (down)
+
+;  Register Saves
+GE_R0: .FILL x0
+GE_R1: .FILL x0
+GE_R2: .FILL x0
+GE_R3: .FILL x0
+GE_R4: .FILL x0
+;no r5
+GE_R6: .FILL x0
+GE_R7: .FILL x0        
+
+GET_EVENT:      
+        ; Register Saving
+        ST R0,GE_R0
+        ST R1,GE_R1
+        ST R2,GE_R2
+        ST R3,GE_R3
+        ST R4,GE_R4
+        ;; don't save R5 because it holds the return value
+        ST R6,GE_R6
+        ST R7,GE_R7
+        
+        ; *** INSERT CODE HERE ***
+        ;; ~50 lines of code or so
+
+        ; Register Restoring
+        LD R0,GE_R0
+        LD R1,GE_R1
+        LD R2,GE_R2
+        LD R3,GE_R3
+        LD R4,GE_R4
+        ;; don't restore R5 because it holds the return value
+        LD R6,GE_R6
+        LD R7,GE_R7
+        
+        RTT
+
+; Input key ASCII codes
+LEFT_KEY:   .FILL x0061     ; Left - 'a'
+RIGHT_KEY:  .FILL x006C     ; Right - 'l'
+QUIT_KEY:   .FILL x002A     ; Quit - '*'
+START_KEY:	.FILL x0020	    ; Start - ' '
+
+; You may want to add some variables here
+
+.END
