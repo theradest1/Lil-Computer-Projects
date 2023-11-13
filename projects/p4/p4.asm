@@ -91,14 +91,28 @@ BADPOS
 		LD R1,BALL_POS_Y
 		LD R2,BALL_VEL_X		;check new x vel
 		ADD R0,R0,R2
+		
 		JSR POINTADDR			;get color
-		LD R3,MAP_BGD_COL_I
 		LDR R0,R0,#0
+		
+		LD R3,MAP_BGD_COL_I
 		ADD R3,R0,R3
 		BRz NOINVERT					;skip next 4 lines if color is the background
+		
 		LD R3,BALL_COL_I
 		ADD R3,R0,R3					;skip if ball color
 		BRz NOINVERT
+		
+		LD R3,BLOCK_COL_I	
+		ADD R3,R0,R3					;if block color
+		BRnp NOBLOCK
+		LD R0,BALL_POS_X
+		LD R1,BALL_POS_Y
+		LD R2,BALL_VEL_X
+		ADD R0,R0,R2
+		JSR HITBLOCK
+NOBLOCK
+		
 		LD R0,BALL_VEL_X
 		NOT R0,R0
 		ADD R0,R0,#1			;invert x velocity
