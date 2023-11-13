@@ -20,11 +20,11 @@ DELAYL	ADD R0,R0,#-1			; a delay so that the game isnt so fast
 
 		;key press
 		LDI R0,KB_STE
-		BRnp #3					;skip key stuff and set vel to 0 if status is zero
+		BRnp DOKEY					;skip key stuff and set vel to 0 if status is zero
 		AND R0,R0,#0
 		ST R0,PLAYER_VEL
 		BRnzp ENDKEY
-
+DOKEY
 		JSR GETKEYQ
 
 		;R0 = pressed key, R1 = tested key, R2 = new velocity
@@ -35,15 +35,17 @@ DELAYL	ADD R0,R0,#-1			; a delay so that the game isnt so fast
 
 		LD R1,K_A
 		ADD R1,R0,R1			; A (left)
-		BRnp #2
+		BRnp NOLEFT
 		ADD R2,R2,R4
 		ST R2,PLAYER_VEL
+NOLEFT
 
 		LD R1,K_D
 		ADD R1,R0,R1			; D (right)
-		BRnp #2
+		BRnp NORIGHT
 		ADD R2,R2,R3
 		ST R2,PLAYER_VEL
+NORIGHT
 
 ENDKEY
 		;player
@@ -93,11 +95,12 @@ BADPOS
 		LD R3,MAP_BGD_COL_I
 		LDR R0,R0,#0
 		ADD R0,R0,R3
-		BRz #4					;skip next 4 lines if color is the background
+		BRz NOINVERT					;skip next 4 lines if color is the background
 		LD R0,BALL_VEL_X
 		NOT R0,R0
 		ADD R0,R0,#1			;invert x velocity
 		ST R0,BALL_VEL_X
+NOINVERT
 
 		LD R0,BALL_POS_X
 		LD R1,BALL_POS_Y
@@ -111,11 +114,11 @@ BADPOS
 		LD R3,MAP_BGD_COL_I
 		LDR R0,R0,#0
 		ADD R3,R3,R0
-		BRz #14					;skip next 14 lines if color is the background
+		BRz ISBACKGROUND					;skip next 14 lines if color is the background
 
 		LD R3,PLAYER_COL_I
 		ADD R3,R3,R0
-		BRnp #7					;skip next 7 lines if color is not player color
+		BRnp NOTPLAYER					;skip next 7 lines if color is not player color
 		JSR PADDLEDIFF
 		LD R1,BALL_VEL_X
 		ADD R0,R0,R1
@@ -124,11 +127,13 @@ BADPOS
 		LD R2,BALL_VEL_X_MAX
 		JSR CLAMP
 		ST R0,BALL_VEL_X
+NOTPLAYER
 
 		LD R0,BALL_VEL_Y
 		NOT R0,R0
 		ADD R0,R0,#1			;invert y velocity
 		ST R0,BALL_VEL_Y
+ISBACKGROUND
 
 		LD R0,BALL_POS_X
 		LD R1,BALL_POS_Y
@@ -295,7 +300,7 @@ BALL_COL 	.FILL x07E0
 K_A		.FILL xFF9F				;x0061		Inverted key codes
 K_D		.FILL xFF9C				;x0064
 
-DELAY	.FILL x3500				;the delay in the program so it doesnt go so fast
+DELAY	.FILL x2000			;the delay in the program so it doesnt go so fast
 
 MAP_WIDTH	.FILL x005A
 MAP_HEIGHT	.FILL x007C
@@ -331,12 +336,14 @@ CLAMP	;clamps value between min and max
 		ADD R3,R3,#1
 
 		ADD R4,R1,R3
-		BRn #1					;check min
+		BRn NOTMIN					;check min
 		AND R0,R1,#-1
+NOTMIN
 
 		ADD R4,R2,R3
-		BRp #1					;check max
+		BRp NOTMAX					;check max
 		AND R0,R2,#-1
+NOTMAX
 
 		RET
 
