@@ -94,8 +94,11 @@ BADPOS
 		JSR POINTADDR			;get color
 		LD R3,MAP_BGD_COL_I
 		LDR R0,R0,#0
-		ADD R0,R0,R3
+		ADD R3,R0,R3
 		BRz NOINVERT					;skip next 4 lines if color is the background
+		LD R3,BALL_COL_I
+		ADD R3,R0,R3					;skip if ball color
+		BRz NOINVERT
 		LD R0,BALL_VEL_X
 		NOT R0,R0
 		ADD R0,R0,#1			;invert x velocity
@@ -115,6 +118,9 @@ NOINVERT
 		LDR R0,R0,#0
 		ADD R3,R3,R0
 		BRz ISBACKGROUND					;skip next 14 lines if color is the background
+		LD R3,BALL_COL_I
+		ADD R3,R0,R3					;skip if ball color
+		BRz ISBACKGROUND
 
 		LD R3,PLAYER_COL_I
 		ADD R3,R3,R0
@@ -127,7 +133,18 @@ NOINVERT
 		LD R2,BALL_VEL_X_MAX
 		JSR CLAMP
 		ST R0,BALL_VEL_X
+		BRnzp INVERTY
 NOTPLAYER
+		LD R3,BLOCK_COL_I		;if color is block
+		ADD R3,R3,R0
+		BRnp INVERTY
+		
+		LD R0,BALL_POS_X
+		LD R1,BALL_POS_Y
+		LD R2,BALL_VEL_Y		;get hit point
+		ADD R1,R1,R2
+		JSR HITBLOCK			;destroy block
+INVERTY
 
 		LD R0,BALL_VEL_Y
 		NOT R0,R0
@@ -155,23 +172,59 @@ ISBACKGROUND
 		BRnzp LOOP				;loop
 
 ; subroutines ------------------
+HITBLOCK	;destroys block that was hit
+	;inputs:
+		;x pos: R0
+		;y pos: R1
+	;overwrites:
+		;R0-R7
+		;R2S-R4S
+		;R7S
+	;outputs:
+		;none
+	ST R7,RE1STORE
+		
+	LD R2,BLOCK_X_MASK
+	LD R3,BLOCK_Y_MASK
+	
+	ADD R0,R0,#-4
+	ADD R1,R1,#-5
+	
+	AND R0,R0,R2
+	AND R1,R1,R3
+	
+	ADD R1,R1,#5
+	ADD R0,R0,#4
+	
+	LD R2,BLOCK_WIDTH
+	ADD R2,R2,#1
+	LD R3,BLOCK_HEIGHT
+	ADD R3,R3,#1
+	LD R4,MAP_BGD_COL
+	
+	JSR POINTG
+	
+	LD R7,RE1STORE
+	
+	RET
+
 
 PADDLEDIFF	; get x difference between paddle and ball
-		;overwrites:
-			;R0-R2
-		;outputs:
-			;x difference: R0
+	;overwrites:
+		;R0-R2
+	;outputs:
+		;x difference: R0
 
-		LD R0,BALL_POS_X
-		LD R1,PLAYER_POS		;load values
-		LD R2,PLAYER_WIDTH_H
-		ADD R1,R1,R2
+	LD R0,BALL_POS_X
+	LD R1,PLAYER_POS		;load values
+	LD R2,PLAYER_WIDTH_H
+	ADD R1,R1,R2
 
-		NOT R1,R1
-		ADD R1,R1,#1			;make player pos negative
+	NOT R1,R1
+	ADD R1,R1,#1			;make player pos negative
 
-		ADD R0,R0,R1
-		RET
+	ADD R0,R0,R1
+	RET
 
 DRAWMAP  ;no inputs, no outputs
     ST R7,RE2STORE
@@ -207,7 +260,7 @@ DRAWMAP  ;no inputs, no outputs
 
     ;blocks
     LD R0,BLOCK_START_Y
-    ADD R0,R0,#-4
+    ADD R0,R0,#-5
     ST R0,RE3STORE  ;y count variable
 BLOCKLOOPY
     LD R0,RE3STORE  ;step y
@@ -217,7 +270,7 @@ BLOCKLOOPY
     ST R0,RE3STORE
 
     LD R0,BLOCK_START_X
-    ADD R0,R0,#-8
+    ADD R0,R0,#-10
     ST R0,RE1STORE  ;x count variable
 BLOCKLOOPX
     LD R0,RE1STORE
@@ -227,10 +280,10 @@ BLOCKLOOPX
     ADD R0,R0,#1
     ST R0,RE1STORE
 
-		LD R3,BLOCK_HEIGHT		;print
+	LD R3,BLOCK_HEIGHT		;print
     LD R1,RE3STORE
-		LD R4,BLOCK_COL
-		JSR POINTG
+	LD R4,BLOCK_COL
+	JSR POINTG
 
     LD R0,RE1STORE
     LD R1,BLOCK_END_X_I
@@ -276,10 +329,10 @@ DI_DATA .FILL xFE06				;print mem address
 PLAYER_POS	.FILL x0024
 PLAYER_Y	.FILL x0076
 PLAYER_VEL	.FILL x0000
-PLAYER_WIDTH	.FILL x000A
+PLAYER_WIDTH	.FILL x0050
 PLAYER_WIDTH_H	.FILL x0005		;half of player width
 PLAYER_HEIGHT	.FILL x0002
-PLAYER_MAX_X_I	.FILL xFFB3
+PLAYER_MAX_X_I	.FILL xFFB7
 PLAYER_MIN_X_I	.FILL xFFFC
 PLAYER_SPEED	.FILL x0002
 PLAYER_SPEED_I	.FILL xFFFE
@@ -295,14 +348,16 @@ BALL_VEL_X	.FILL x0001
 BALL_VEL_Y	.FILL x0001
 BALL_VEL_X_MIN	.FILL xFFFE
 BALL_VEL_X_MAX	.FILL x0002
-BALL_COL 	.FILL x07E0
+
+BALL_COL 	.FILL xFFF0
+BALL_COL_I 	.FILL x0010
 
 K_A		.FILL xFF9F				;x0061		Inverted key codes
 K_D		.FILL xFF9C				;x0064
 
-DELAY	.FILL x2000			;the delay in the program so it doesnt go so fast
+DELAY	.FILL x0000;1500			;the delay in the program so it doesnt go so fast
 
-MAP_WIDTH	.FILL x005A
+MAP_WIDTH	.FILL x0059
 MAP_HEIGHT	.FILL x007C
 MAP_WALL_WIDTH	.FILL x0004
 MAP_BGD_COL		.FILL x1012
@@ -310,13 +365,19 @@ MAP_BGD_COL_I	.FILL xEFEE
 MAP_WALL_COL	.FILL xC000
 
 BLOCK_COL	.FILL x07E0
-BLOCK_HEIGHT	.FILL x0004
-BLOCK_WIDTH		.FILL x0008
+BLOCK_COL_I	.FILL xF820
+BLOCK_HEIGHT	.FILL x0007
+BLOCK_WIDTH		.FILL x000F
 BLOCK_Y		.FILL x0008
-BLOCK_START_X .FILL x0004   ;is negative because there is an initial step in loop (makes things more simple to do this)
-BLOCK_END_X_I .FILL xFFBA
-BLOCK_START_Y .FILL x0008
+BLOCK_START_X .FILL xFFFF
+BLOCK_END_X_I .FILL xFFC0
+BLOCK_START_Y .FILL x0002
 BLOCK_END_Y_I .FILL xFFE5
+
+BLOCK_X_MASK	.FILL xFFF0
+BLOCK_Y_MASK	.FILL xFFF8
+
+RANDCOL		.FILL xF0F0
 
 
 ;subroutines --------------- Generally uses R0-R5
