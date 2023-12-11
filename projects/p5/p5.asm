@@ -32,6 +32,9 @@ START:	;; CLEAR THE SCREEN
 	TRAP x40
 
 GAME_LOOP:
+	LD R0, BRICKS_LEFT
+	BRz WIN_SR
+
 	; Put some delay to slow down the ball	
 	JSR DELAY_LOOP_SR
 
@@ -83,6 +86,7 @@ GAME_LOOP:
 	ADD R5, R5, #0
 	BRp GAME_LOOP
 GAME_OVER:
+	JSR LOSE_SR
 	HALT
 WALL_COLLISION:
 	JSR WALL_COL_SR
@@ -375,6 +379,7 @@ PADDLE_NEXT_LOC_SR
 PADDLE_MOVE_L:
 	;; if 'a' is pressed move paddle to left by one 4x4 block
 	ADD R4, R4, #-1	;move variable
+	BRz PADDLE_DONE_NO
 
 	;visually move
 	ADD R0, R4, #0
@@ -390,6 +395,8 @@ PADDLE_MOVE_L:
 PADDLE_MOVE_R:
 	;; if 'd' is pressed move paddle to right by one 4x4 block
 	ADD R4, R4, #1	
+	ADD R0, R4, #-16
+	BRz PADDLE_DONE_NO
 
 	;visually move
 	ADD R0, R4, #4
@@ -406,9 +413,19 @@ QUIT:
 	HALT
 PADDLE_DONE:
 	ST R4, PADDLE_CURR_POS ;; Store the new position of the paddle
+PADDLE_DONE_NO: ; if paddle is done, but I dont want to change the current pos
 	LD R7, TEMP
 	RET
-			
+
+WIN_SR: 
+	LEA R0, WIN_MSG
+	TRAP x22
+	HALT
+
+LOSE_SR:
+	LEA R0, LOSE_MSG
+	TRAP x22
+	HALT
 
 DELETE_L_BRICK_SR
 	LD R5,BSTART	; starting at the top left corner of the 1st brick
@@ -490,6 +507,9 @@ PADDLE_WIDTH .FILL 5
 KEY_A		.FILL xFF9F				;x0061		Inverted key codes
 KEY_D		.FILL xFF9C				;x0064
 KEY_Q		.FILL xFF8F				;x0071
+
+WIN_MSG: 	.STRINGZ "You Win!!!"
+LOSE_MSG: 	.STRINGZ "You Lose!!!"
 
 
 .end
