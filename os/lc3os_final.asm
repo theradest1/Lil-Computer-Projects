@@ -594,6 +594,8 @@ GET_EVENT:
 	LDI R0,OS_KBSR		; wait for a keystroke
 	BRzp DONE_INPUT
 	LDI R5,OS_KBDR		; read it and return
+	ADD R0, R5, #0
+	OUT
 DONE_INPUT:
 	
         ; Register Restoring

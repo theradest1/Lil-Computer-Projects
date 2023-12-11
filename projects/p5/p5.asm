@@ -10,7 +10,7 @@ START:	;; CLEAR THE SCREEN
 	
 	;**************************************
 	;; Find DRAW_PADDLE_SR subroutine and implement it
-	; JSR DRAW_PADDLE_SR		; Subroutine to draw the paddle. Uncomment this line once you 
+	JSR DRAW_PADDLE_SR		; Subroutine to draw the paddle. Uncomment this line once you 
 						; put in the code to draw the paddle in there.
 	;**************************************
 	
@@ -73,7 +73,7 @@ GAME_LOOP:
 
 	;**************************************
 	;; Find PADDLE_NEXT_LOC_SR subroutine and implement it
-	; JSR PADDLE_NEXT_LOC_SR	; uncomment this line once to implement the code to move the paddle to the
+	JSR PADDLE_NEXT_LOC_SR	; uncomment this line once to implement the code to move the paddle to the
 						; next location in the subroutine.
 	;**************************************
 
@@ -201,10 +201,16 @@ DRAW_PADDLE_SR
 	;; Color of the paddle should be RED
 	
 	; Initialize registers here
+	LD R0, PADDLE_CURR_POS
+	LD R1, PADDLE_HEIGHT
+	LD R2, RED
 
+	LD R3, PADDLE_WIDTH
 	ST R7, TEMP ;; we need to store R7 because we will call the TRAP
 PADDLE_LOOP:
-	; Draw a 4x4 RED block here
+	TRAP x40
+	ADD R0, R0, #1
+	ADD R3, R3, #-1
 	BRp PADDLE_LOOP
 	LD R7, TEMP ;; loading R7 to jump back to the instruction after the JSR
 	RET
@@ -347,22 +353,57 @@ FLIP_CORNER:
 PADDLE_NEXT_LOC_SR
 	ST R7, TEMP
 	;; Get the key pressed by the user 'a' equals 'left' and 'd' equals 'right'
-	TRAP x42 
+	TRAP x42  ;in R5
 	
 	LD R4, PADDLE_CURR_POS ;; get current position of paddle
 	LD R1, THIRTY ;; the row number where the paddle is present
 	;; check if the user pressed 'a'
+	LD R0, KEY_A
+	ADD R0, R0, R5
+	BRz PADDLE_MOVE_L
 
-	BRp PADDLE_MOVE_L
 	;; check if the user pressed 'd'
-	BRp PADDLE_MOVE_R
+	LD R0, KEY_D
+	ADD R0, R0, R5
+	BRz PADDLE_MOVE_R
+
+	;; check if the user pressed 'q'
+	LD R0, KEY_Q
+	ADD R0, R0, R5
+	BRz QUIT
 	BRnzp PADDLE_DONE
 PADDLE_MOVE_L:
-	;; if 'a' is pressed move paddle to left by one 4x4 block	
+	;; if 'a' is pressed move paddle to left by one 4x4 block
+	ADD R4, R4, #-1	;move variable
+
+	;visually move
+	ADD R0, R4, #0
+	LD R1, PADDLE_HEIGHT
+	LD R2, RED
+	TRAP x40
+
+	ADD R0, R0, #5
+	LD R2, BLACK
+	TRAP x40
+
 	BRnzp PADDLE_DONE
 PADDLE_MOVE_R:
 	;; if 'd' is pressed move paddle to right by one 4x4 block
+	ADD R4, R4, #1	
+
+	;visually move
+	ADD R0, R4, #4
+	LD R1, PADDLE_HEIGHT
+	LD R2, RED
+	TRAP x40
+	
+	ADD R0, R0, #-5
+	LD R2, BLACK
+	TRAP x40
+
 	BRnzp PADDLE_DONE
+QUIT:
+	HALT
 PADDLE_DONE:
 	ST R4, PADDLE_CURR_POS ;; Store the new position of the paddle
 	LD R7, TEMP
@@ -442,7 +483,13 @@ FOUR .FILL x0004
 NEXTR .FILL x002C	;44
 BOTTOM .FILL 15360	;(128*120)		
 TEMP		.FILL 0
-PADDLE_CURR_POS .FILL 10
+PADDLE_CURR_POS .FILL 8
+PADDLE_HEIGHT .FILL 30
+PADDLE_WIDTH .FILL 5
+
+KEY_A		.FILL xFF9F				;x0061		Inverted key codes
+KEY_D		.FILL xFF9C				;x0064
+KEY_Q		.FILL xFF8F				;x0071
 
 
 .end
